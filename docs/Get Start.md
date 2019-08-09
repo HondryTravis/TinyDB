@@ -80,7 +80,6 @@ PS: 切忌频繁删除表(数据过大的时候……)
 ## 二期目标
 
  - `some(tableName,startIndex,endIndex)` 截取指定索引范围数据
- -  `someUptate(tableName,data)` 更新部分或几页数据
+ - `someUptate(tableName,data)` 更新部分或几条数据
  - 数据回滚机制,如果添加失败,回到添加之前的状态,失败的数据移至错误表
  - 处理各种bug
-
