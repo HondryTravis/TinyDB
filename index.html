@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./lib/skin/Main.css" />
+  </head>
+
+  <body>
+    <h2>IndexDB Demo</h2>
+    <div class="test">
+      <h3>添加数据</h3>
+      <div>
+        <div class="ctrl add">
+          <ul>
+            <li class="use-id">
+              <label for="">姓名</label>
+              <input type="text" class="id" placeholder="请输入id" />
+            </li>
+            <li class="use-name">
+              <label for="">姓名</label>
+              <input type="text" class="name" placeholder="请输入姓名" />
+            </li>
+            <li class="use-school">
+              <label for="">学校</label>
+              <input type="text" class="school" placeholder="请输入学校" />
+            </li>
+            <li>
+              <button id="addData">添加</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>修改数据</h3>
+      <div>
+        <div class="ctrl put">
+          <ul>
+            <li class="use-id">
+              <label for="">姓名</label>
+              <input type="text" class="id" placeholder="请输入id" />
+            </li>
+            <li class="use-name">
+              <label for="">姓名</label>
+              <input type="text" class="name" placeholder="请输入姓名" />
+            </li>
+            <li class="use-school">
+              <label for="">学校</label>
+              <input type="text" class="school" placeholder="请输入学校" />
+            </li>
+            <li>
+              <button id="putData">修改</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>删除数据</h3>
+      <div>
+        <div class="ctrl delete">
+          <ul>
+            <li class="use-id">
+              <label for="">姓名</label>
+              <input type="text" class="id" placeholder="请输入id" />
+            </li>
+            <li class="use-name">
+              <label for="">姓名</label>
+              <input type="text" class="name" placeholder="请输入姓名" />
+            </li>
+            <li class="use-school">
+              <label for="">学校</label>
+              <input type="text" class="school" placeholder="请输入学校" />
+            </li>
+            <li>
+              <button id="deleteData">删除</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <h3>查找数据</h3>
+      <div>
+        <div class="ctrl query">
+          <ul>
+            <li class="use-id">
+              <label for="">姓名</label>
+              <input type="text" class="id" placeholder="请输入id" />
+            </li>
+            <li class="use-name">
+              <label for="">姓名</label>
+              <input type="text" class="name" placeholder="请输入姓名" />
+            </li>
+            <li class="use-school">
+              <label for="">学校</label>
+              <input type="text" class="school" placeholder="请输入学校" />
+            </li>
+            <li>
+              <button id="queryData">查找</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="show-data">
+        <div class="show-head">
+          <ul>
+            <li>id</li>
+            <li>姓名</li>
+            <li>学校</li>
+          </ul>
+        </div>
+        <div id="showData"></div>
+      </div>
+    </div>
+  </body>
+  <script src="./lib/core/tinydb.js"></script>
+
+  <script>
+    const options = {
+      databaseName: "test",
+      tables: [
+        {
+          name: "table_student",
+          keyPath: "id",
+          autoIncrement: true,
+          indexs: [
+            {
+              index: "id",
+              relativeIndex: "id",
+              unique: true
+            },
+            {
+              index: "name",
+              relativeIndex: "name",
+              unique: false
+            },
+            {
+              index: "school",
+              relativeIndex: "school",
+              unique: false
+            }
+          ]
+        }
+      ]
+    };
+    const test = new TinyDB(options);
+    const add = document.querySelector("#addData");
+    const put = document.querySelector("#putData");
+    const _delete = document.querySelector("#deleteData");
+    const query = document.querySelector("#queryData");
+    let wrap = document.querySelector("#showData");
+    let frame = document.createDocumentFragment();
+
+    showData();
+    add.onclick = () => {
+      let inputs = document.querySelectorAll(".add input");
+      let data = {
+        name: inputs[1].value,
+        school: inputs[2].value
+      };
+      if (inputs[0].value !== "") data.id = inputs[0].value;
+      test.insert("table_student", data);
+      showData();
+    };
+
+    // test.insert('table_student', {name: '李2', school : '北京大学'})
+    // test.insert('table_student', {name: '李2', school : '北京大学'})
+    // test.insert('table_student', {name: '李3', school : '北京大学'})
+    // test.insert('table_student', {name: '李4', school : '北京大学'})
+    // test.insert('table_student', {name: '李5', school : '北京大学'})
+
+    put.onclick = () => {
+      let inputs = document.querySelectorAll(".put input");
+      let data = {
+        name: inputs[1].value,
+        school: inputs[2].value
+      };
+      if (inputs[0].value !== "") data.id = +inputs[0].value;
+      test.update("table_student", data);
+      showData();
+    };
+
+    _delete.onclick = () => {
+      let inputs = document.querySelectorAll(".delete input");
+      let data = {};
+      inputs.forEach(item => {
+        if (item.value !== "") {
+          data[`${item.className}`] = item.value;
+          test.delete("table_student", data).then(res => {
+            showData();
+          });
+        }
+      });
+    };
+    query.onclick = () => {
+      let inputs = document.querySelectorAll(".query input");
+      let data = {};
+      inputs.forEach(item => {
+        if (item.value !== "") {
+          if (item.className === "id") {
+            data[`${item.className}`] = parseInt(item.value);
+            test.selectId("table_student", parseInt(item.value)).then(res => {
+              console.log(res)
+                const ul = new Element("ul", { id: "db-data" }, [
+                  new Element("li", { class: "id" }, [`${res.id}`]),
+                  new Element("li", { class: "name" }, [`${res.name}`]),
+                  new Element("li", { class: "school" }, [`${res.school}`])
+                ]);
+                // console.log(ul)
+                frame.append(ul.render());
+          
+              wrap.innerHTML = ``;
+              wrap.append(frame);
+            });
+          } else {
+            data[`${item.className}`] = item.value;
+            test.select("table_student", data).then(res => {
+              res.forEach(item => {
+                const ul = new Element("ul", { id: "db-data" }, [
+                  new Element("li", { class: "id" }, [`${item.id}`]),
+                  new Element("li", { class: "name" }, [`${item.name}`]),
+                  new Element("li", { class: "school" }, [`${item.school}`])
+                ]);
+                // console.log(ul)
+                frame.append(ul.render());
+              });
+              wrap.innerHTML = ``;
+              wrap.append(frame);
+            });
+          }
+        }
+      });
+    };
+
+    const Element = function(tagName, props, children) {
+      this.tagName = tagName;
+      this.props = props;
+      this.children = children;
+    };
+
+    Element.prototype.render = function() {
+      const ele = document.createElement(this.tagName);
+      const props = this.props;
+
+      for (var propsName in props) {
+        var propsValue = props[propsName];
+        ele.setAttribute(propsName, propsValue);
+      }
+      const children = this.children || [];
+      children.forEach(child => {
+        const childEl =
+          child instanceof Element
+            ? child.render()
+            : document.createTextNode(child);
+        ele.appendChild(childEl);
+      });
+      return ele;
+    };
+    const createElement = function(tagName, props, children) {
+      return new Element(tagName, props, children);
+    };
+
+    function showData() {
+      test.selectAll("table_student").then(res => {
+        res.forEach(item => {
+          const ul = new Element("ul", { id: "db-data" }, [
+            new Element("li", { class: "id" }, [`${item.id}`]),
+            new Element("li", { class: "name" }, [`${item.name}`]),
+            new Element("li", { class: "school" }, [`${item.school}`])
+          ]);
+          frame.append(ul.render());
+        });
+        wrap.innerHTML = ``;
+        wrap.append(frame);
+      });
+    }
+
+    // inputs.forEach(item => {
+    //   item.onfocus = () => {
+    //     console.log(item.parentNode.classList[0].replace('use-', ''))
+    //     item.innerHTML = ''
+    //   }
+    // })
+
+    //  test.selectAll('table_student').then( res  => {
+    //   console.log(res)
+    // })
+
+    // test.insert('table_student', {name: '李2', school : '北京大学'})
+    // test.insert('table_student', {name: '李2', school : '北京大学'})
+    // test.insert('table_student', {name: '李3', school : '北京大学'})
+    // test.insert('table_student', {name: '李4', school : '北京大学'})
+    // test.insert('table_student', {name: '李5', school : '北京大学'})
+
+    // test.createTable(options.tables, 3)
+    // test.deleteTable('table_student', 2)
+    // test.create()
+    // test.select('table_student', {name: '张三'}).then(res=> {
+    //   console.log(res)
+    // })
+
+    // test.select('table_school', { school: '清华大学',id: 1}).then(res=> {
+    //   console.log(res)
+    // })
+
+    // test.insert('table_student', {name: '张四', school : '北京大学'})
+    // test.insert('table_student', {name: '李五', school : '北京大学'})
+    // test.delete('table_student', { name: '李2' }).then(res => {
+    //   console.log('删除成功')
+    // })
+
+    // test.insert({name: '张四', school : '北京大学'})
+    // test.insert({name: '张五', school : '北京大学'})
+    // test.select('table_student', {school: '北京大学'}).then( res => {
+    //   console.log(res)
+    // })
+    //   test.update('table_student', {id: 1, name: '李2' , school: '清华大学'}).then( res => {
+    //   console.log(res)
+    // })
+    // test.connect().then(db=>{
+    //   console.log(db)
+    // })
+  </script>
+</html>
