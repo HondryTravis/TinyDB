@@ -6,7 +6,4 @@
   # then
   gulp
 ```
-
-you can copy lib/core/tinydb.js to anywhere~
-
-good luck
+Good luck~
