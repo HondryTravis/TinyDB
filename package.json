@@ -1,7 +1,7 @@
 {
-  "name": "tiny-indexdb",
+  "name": "tinydb",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/core/tinydb.js",
   "license": "MIT",
   "devDependencies": {
     "@types/axios": "^0.14.0",
@@ -18,9 +18,5 @@
     "rollup-plugin-typescript": "^1.0.1",
     "tslib": "^1.10.0",
     "typescript": "^3.4.5"
-  },
-  "dependencies": {
-    "axios": "^0.19.0",
-    "indb": "^2.0.2"
   }
 }
