@@ -163,13 +163,6 @@
       test.insert("table_student", data);
       showData();
     };
-
-    // test.insert('table_student', {name: '李2', school : '北京大学'})
-    // test.insert('table_student', {name: '李2', school : '北京大学'})
-    // test.insert('table_student', {name: '李3', school : '北京大学'})
-    // test.insert('table_student', {name: '李4', school : '北京大学'})
-    // test.insert('table_student', {name: '李5', school : '北京大学'})
-
     put.onclick = () => {
       let inputs = document.querySelectorAll(".put input");
       let data = {
@@ -207,7 +200,6 @@
                   new Element("li", { class: "name" }, [`${res.name}`]),
                   new Element("li", { class: "school" }, [`${res.school}`])
                 ]);
-                // console.log(ul)
                 frame.append(ul.render());
           
               wrap.innerHTML = ``;
@@ -275,51 +267,5 @@
         wrap.append(frame);
       });
     }
-
-    // inputs.forEach(item => {
-    //   item.onfocus = () => {
-    //     console.log(item.parentNode.classList[0].replace('use-', ''))
-    //     item.innerHTML = ''
-    //   }
-    // })
-
-    //  test.selectAll('table_student').then( res  => {
-    //   console.log(res)
-    // })
-
-    // test.insert('table_student', {name: '李2', school : '北京大学'})
-    // test.insert('table_student', {name: '李2', school : '北京大学'})
-    // test.insert('table_student', {name: '李3', school : '北京大学'})
-    // test.insert('table_student', {name: '李4', school : '北京大学'})
-    // test.insert('table_student', {name: '李5', school : '北京大学'})
-
-    // test.createTable(options.tables, 3)
-    // test.deleteTable('table_student', 2)
-    // test.create()
-    // test.select('table_student', {name: '张三'}).then(res=> {
-    //   console.log(res)
-    // })
-
-    // test.select('table_school', { school: '清华大学',id: 1}).then(res=> {
-    //   console.log(res)
-    // })
-
-    // test.insert('table_student', {name: '张四', school : '北京大学'})
-    // test.insert('table_student', {name: '李五', school : '北京大学'})
-    // test.delete('table_student', { name: '李2' }).then(res => {
-    //   console.log('删除成功')
-    // })
-
-    // test.insert({name: '张四', school : '北京大学'})
-    // test.insert({name: '张五', school : '北京大学'})
-    // test.select('table_student', {school: '北京大学'}).then( res => {
-    //   console.log(res)
-    // })
-    //   test.update('table_student', {id: 1, name: '李2' , school: '清华大学'}).then( res => {
-    //   console.log(res)
-    // })
-    // test.connect().then(db=>{
-    //   console.log(db)
-    // })
   </script>
 </html>
