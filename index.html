@@ -101,7 +101,32 @@
           </ul>
         </div>
       </div>
-
+      <!-- <h3>区间查找</h3>
+      <div>
+        <div class="ctrl some">
+          <ul>
+            <li class="use-id">
+              <label for="">开始id</label>
+              <input type="text" class="id" placeholder="请输入id" />
+            </li>
+            <li class="use-id">
+              <label for="">结束id</label>
+              <input type="text" class="id" placeholder="请输入id" />
+            </li>
+            <li class="use-name">
+              <label for="">姓名</label>
+              <input type="text" class="name" placeholder="请输入姓名" />
+            </li>
+            <li class="use-school">
+              <label for="">学校</label>
+              <input type="text" class="school" placeholder="请输入学校" />
+            </li>
+            <li>
+              <button id="someData">查找</button>
+            </li>
+          </ul>
+        </div>
+      </div> -->
       <div class="show-data">
         <div class="show-head">
           <ul>
@@ -145,6 +170,13 @@
       ]
     };
     const test = new TinyDB(options);
+
+    // test.insert('table_student', {name: '李1', school : '北京大学1'})
+    // test.insert('table_student', {name: '李2', school : '北京大学2'})
+    // test.insert('table_student', {name: '李3', school : '北京大学3'})
+    // test.insert('table_student', {name: '李4', school : '北京大学4'})
+    // test.insert('table_student', {name: '李5', school : '北京大学5'})
+    // test.some('table_student', 'name', '李1', '李2')
     const add = document.querySelector("#addData");
     const put = document.querySelector("#putData");
     const _delete = document.querySelector("#deleteData");

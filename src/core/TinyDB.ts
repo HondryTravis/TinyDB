@@ -1,5 +1,5 @@
 import { DatabaseTable, Database, RuleIndex } from "./types";
-import { Table } from './Table'
+import { Table } from './Table';
 export class TinyDB {
   openedDB!: IDBOpenDBRequest
   name: string
@@ -93,6 +93,16 @@ export class TinyDB {
           resolve(res)
         }).catch( (err:any) => {
           reject(err)
+        })
+      })
+    })
+  }
+  some(name:string, index: any, startIndex: any, endIndex: any) {
+    return new Promise((resolve, reject) => {
+      this.connect().then( (db: IDBDatabase) => {
+        const table = new Table(name, db)
+        table.some(index, startIndex, endIndex).then( (res:any) => {
+            console.log(res)
         })
       })
     })

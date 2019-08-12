@@ -1,3 +1,6 @@
+import { resolve } from 'url';
+import { rejects } from 'assert';
+
 export class Table {
   name: string
   db: IDBDatabase
@@ -23,7 +26,7 @@ export class Table {
       indexValue = selector[name]
     }
     return new Promise((resolve,reject)=>{
-      const selectRequest = this.request().index(index).getAll(indexValue)
+      const selectRequest = this.request().index(index).get(indexValue)
       selectRequest.onsuccess = (e:any) => {
         resolve(e.target.result)
       }
@@ -53,6 +56,27 @@ export class Table {
         reject(e.target.result)
       }
     })
+  }
+  // some 
+  some(index: any, start:any, end:any) {
+  return new Promise((resolve, reject) => {
+    const temp:any = [];
+    const cursor =  this.request().index(index);
+    const range = IDBKeyRange.bound(start, end)
+    cursor.openCursor(range).onsuccess = (ev:any ) => {
+       const res = ev.target.result;
+       if(res){
+        temp.push(res.value)
+        res.continue()
+       }else{
+         console.log('数据抽取结束')
+         resolve(temp)
+       }
+    }
+    cursor.openCursor(range).onerror = (ev: any) => {
+      reject(ev)
+    }
+  })
   }
   // put 
   update(data: any) {
