@@ -146,11 +146,11 @@
 
 #### `select(name: string, selecter: any): Promise` 查找数据库，通过匹配的selector对象来查找
 
-`@param name` 数据库名称
+`@param name` 数据表名称
 
 `@param selecter` 查找的数据库对象，键值对，包含索引名称和值，example ：`{name: '李1'}
 
-####`selectId(name: string, id: number): Promise` 通过id查找数据，匹配id
+#### `selectId(name: string, id: number): Promise` 通过id查找数据，匹配id
 
 `@param name` 数据表名称
 
@@ -166,7 +166,7 @@
 
 `@param endIndex` 结束索引位置
 
-####`update(name: string, data: any): Promise` 更新数据
+#### `update(name: string, data: any): Promise` 更新数据
 
 `@param name ` 数据表名称
 
