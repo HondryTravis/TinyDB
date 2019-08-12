@@ -102,8 +102,82 @@
 
 ```
 
-## DataBase Api 数据库方法
+## DataBase Api 实例方法
+
+### Method 方法
+
+#### `createDateBase(databaseName<string>, version<number>):viod `新建数据库
+
+`@param databaseName`: 数据库名称
+
+`@param version` 数据库版本号
+
+#### `createTable(tables:Array<Object>, version):void` 创建表
+
+`@param tables` 多个或一个表属性集合
+
+`@param version` 数据库版本
+
+#### `deleteTable(tableName:string, version:number):viod` 删除表
+
+`@param tableName` 数据库表的名字
+
+`@param version` 数据库版本号
+
+#### `createIndex(table:IDBObjectStore, option<tableIndex>):void` 创建表索引
+
+`@param table` 数据库表实例，也就是仓库
+
+`@param option` 数据表索引集合
+
+#### `connect(name?: string):Promise<IDBDatabase>`连接数据库，异步回调
+
+`@param name` 可选，默认为空值，默认打开创建的单个数据库
+
+#### `close():void` 关闭数据库
+
+#### `insert(name: string, data: any): void`
+
+`@param name` 数据库表名称
+
+`@param data` 要保持的数据，可以使对象，可以使json string，可以是blob对象
 
 
 
-### ``
+#### `select(name: string, selecter: any): Promise` 查找数据库，通过匹配的selector对象来查找
+
+`@param name` 数据库名称
+
+`@param selecter` 查找的数据库对象，键值对，包含索引名称和值，example ：`{name: '李1'}
+
+####`selectId(name: string, id: number): Promise` 通过id查找数据，匹配id
+
+`@param name` 数据表名称
+
+`@param id` id
+
+#### `some(name: string, index: any, startIndex: any, endIndex: any): Promise` 查找一定范围的数据
+
+`@param name` 数据表名称
+
+`@param index` 索引名称
+
+`@param startIndex` 开始索引位置
+
+`@param endIndex` 结束索引位置
+
+####`update(name: string, data: any): Promise` 更新数据
+
+`@param name ` 数据表名称
+
+`@param data` 更新或者添加的数据
+
+#### `delete(name: string, data: any): Promise` 删除数据
+
+`@param name` 数据表名称
+
+`@param data` 删除的数据包含索引和索引值，键值对形式
+
+#### `selectAll(name: string): Promise` 查找所有值
+
+`@param name` 数据表名称
