@@ -162,9 +162,17 @@
 
 `@param index` 索引名称
 
-`@param startIndex` 开始索引位置
+`@param startIndex` 开始索引位置值，不是id
 
-`@param endIndex` 结束索引位置
+`@param endIndex` 结束索引位置值，不是id
+
+```javascript
+
+  const option = {...}
+  const test = new TinyDB(option)
+  test.some('test_table', 'uid', 100,200) // 查找uid 100-200的所有人
+
+```
 
 #### `update(name: string, data: any): Promise` 更新数据
 
@@ -172,12 +180,38 @@
 
 `@param data` 更新或者添加的数据
 
+```javascript
+
+  const option = {...}
+  const test = new TinyDB(option)
+  test.update('test_table', {
+    id: 1, // 如果id重复就修改，id不重复就添加
+    name: '...',
+    uids: [...]
+  }) // 查找uid 100-200的所有人
+
+```
+
 #### `delete(name: string, data: any): Promise` 删除数据
 
 `@param name` 数据表名称
 
 `@param data` 删除的数据包含索引和索引值，键值对形式
 
+```javascript
+
+  const option = {...}
+  const test = new TinyDB(option)
+  test.delete('test_table', {name:'李四'}) // 删除name为李四的那一条数据
+
+```
+
 #### `selectAll(name: string): Promise` 查找所有值
 
 `@param name` 数据表名称
+
+```javascript
+  const option = {...}
+  const test = new TinyDB(option)
+  test.selectAll('test_table') // 查询数据表中的所有数据
+```

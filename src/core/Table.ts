@@ -104,7 +104,6 @@ export class Table {
   delete(selector: any) {
     return new Promise( (resolve, reject) => {
       this.select(selector).then( (res: any) => {
-        console.log(res)
         res.forEach( (item: any) => {
           const deleteRequest = this.request().delete(item.id)
           deleteRequest.onsuccess = (e: any) => {
@@ -114,7 +113,6 @@ export class Table {
             reject(e)
           }
         })
-       
       })
     })
   }

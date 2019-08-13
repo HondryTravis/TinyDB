@@ -102,7 +102,9 @@ export class TinyDB {
       this.connect().then( (db: IDBDatabase) => {
         const table = new Table(name, db)
         table.some(index, startIndex, endIndex).then( (res:any) => {
-            console.log(res)
+          resolve(res)
+        }).catch( (error: any)=> {
+          reject(error)
         })
       })
     })
