@@ -1,6 +1,3 @@
-import { resolve } from 'url';
-import { rejects } from 'assert';
-
 export class Table {
   name: string
   db: IDBDatabase
