@@ -23,7 +23,7 @@ export class Table {
       indexValue = selector[name]
     }
     return new Promise((resolve,reject)=>{
-      const selectRequest = this.request().index(index).get(indexValue)
+      const selectRequest = this.request().index(index).getAll(indexValue)
       selectRequest.onsuccess = (e:any) => {
         resolve(e.target.result)
       }
