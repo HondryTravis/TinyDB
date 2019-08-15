@@ -219,3 +219,12 @@
 #### `clearTable(name:string):Promise` 删除某一张表数据
 
 `@param name` 表名 
+
+```typescript
+   test.clearTable('test_table').then( res => {
+     console.log('success)
+   }).catch( err => {
+     return new Error(err)
+   })
+
+```
