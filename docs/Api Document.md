@@ -215,3 +215,7 @@
   const test = new TinyDB(option)
   test.selectAll('test_table') // 查询数据表中的所有数据
 ```
+
+#### `clearTable(name:string):Promise` 删除某一张表数据
+
+`@param name` 表名 

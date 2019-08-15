@@ -116,4 +116,15 @@ export class Table {
       })
     })
   }
+  clear() {
+    return new Promise( (resolve, reject) => {
+      const deleteRequest = this.request().clear()
+      deleteRequest.onsuccess = (e: any) => {
+        resolve(e)
+      }
+      deleteRequest.onerror = (e: any) => {
+        reject(e)
+      }
+    })
+  }
 }
