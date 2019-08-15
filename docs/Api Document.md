@@ -226,5 +226,4 @@
    }).catch( err => {
      return new Error(err)
    })
-
 ```
