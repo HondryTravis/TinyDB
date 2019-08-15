@@ -222,7 +222,7 @@
 
 ```typescript
    test.clearTable('test_table').then( res => {
-     console.log('success)
+     console.log('success')
    }).catch( err => {
      return new Error(err)
    })
