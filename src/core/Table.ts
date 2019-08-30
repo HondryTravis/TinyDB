@@ -104,19 +104,21 @@ export class Table {
   delete(selector: any) {
     return new Promise( (resolve, reject) => {
       this.select(selector).then( (res: any) => {
-        res.forEach( (item: any, index: any, arr: any) => {
-          const request = this.request()
-          const keyPath = request.keyPath as string
-          const deleteRequest = request.delete(item[keyPath])
-          deleteRequest.onsuccess = (e: any) => {
-            if(index === arr.length-1) {
-              resolve(e)
+        if(res.length) {
+          res.forEach( (item: any, index: any, arr: any) => {
+            const request = this.request()
+            const keyPath = request.keyPath as string
+            const deleteRequest = request.delete(item[keyPath])
+            deleteRequest.onsuccess = (e: any) => {
+              if(index === arr.length-1) {
+                resolve(e)
+              }
             }
-          }
-          deleteRequest.onerror = (e: any) => {
-            reject(e)
-          }
-        })
+            deleteRequest.onerror = (e: any) => {
+              reject(e)
+            }
+          })
+        }
       })
     })
   }

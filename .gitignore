@@ -3,5 +3,6 @@ node_modules/
 .DS_Store
 yarn.lock
 package-lock.json
+lib/
 lib/core/*.map
 lib/core/*.html
