@@ -104,10 +104,14 @@ export class Table {
   delete(selector: any) {
     return new Promise( (resolve, reject) => {
       this.select(selector).then( (res: any) => {
-        res.forEach( (item: any) => {
-          const deleteRequest = this.request().delete(item.id)
+        res.forEach( (item: any, index: any, arr: any) => {
+          const request = this.request()
+          const keyPath = request.keyPath as string
+          const deleteRequest = request.delete(item[keyPath])
           deleteRequest.onsuccess = (e: any) => {
-            resolve(e)
+            if(index === arr.length-1) {
+              resolve(e)
+            }
           }
           deleteRequest.onerror = (e: any) => {
             reject(e)
