@@ -12,7 +12,7 @@
 </script>  
 ```
 
-###  实例化需要配置的参数
+### 实例化需要配置的参数
 
 #### 数据库配置项
 
@@ -106,7 +106,7 @@
 
 ### Method 方法
 
-#### `createDateBase(databaseName<string>, version<number>):viod `新建数据库
+#### `createDateBase(databaseName<string>, version<number>):viod`新建数据库
 
 `@param databaseName`: 数据库名称
 
@@ -142,8 +142,6 @@
 
 `@param data` 要保持的数据，可以使对象，可以使json string，可以是blob对象
 
-
-
 #### `select(name: string, selecter: any): Promise` 查找数据库，通过匹配的selector对象来查找
 
 `@param name` 数据表名称
@@ -176,7 +174,7 @@
 
 #### `update(name: string, data: any): Promise` 更新数据
 
-`@param name ` 数据表名称
+`@param name` 数据表名称
 
 `@param data` 更新或者添加的数据
 
@@ -218,7 +216,7 @@
 
 #### `clearTable(name:string):Promise` 删除某一张表数据
 
-`@param name` 表名 
+`@param name` 表名
 
 ```typescript
    test.clearTable('test_table').then( res => {

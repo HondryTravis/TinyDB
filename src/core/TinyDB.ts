@@ -70,7 +70,11 @@ export class TinyDB {
     return new Promise( (resolve, reject) => {
       this.connect().then( (db: IDBDatabase) => {
         const table = new Table(name, db)
-        table.insert(data).then(resolve).catch(reject); 
+        table.insert(data).then((res)=> {
+          resolve(res)
+        }).catch( (error) => {
+          reject(error)
+        }); 
       })
     })
   }
