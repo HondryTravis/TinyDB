@@ -1,11 +1,20 @@
+:root {
+  --color: 'red';
+  --fontsize: 12px;
+  --bgColor: #EEEEEE;
+  --inputBgColor: #DDDDDD;
+  --top20: 20px;
+  --itemHeight: 40px;
+  --maxItemWidth: 40px;
+}
 * {
   margin: 0;
   padding: 0;
 }
 body {
   color: #555;
-  background: #fff;
-  font-size: 12px;
+  background: var(--bgColor);
+  font-size: var(--fontsize);
 }
 h1,
 h2,
@@ -19,30 +28,63 @@ ul,
 ol {
   list-style: none;
 }
-.test {
+
+h1 {
+  font-size: 24px;
+  margin: 20px auto;
+}
+
+.ctrlbar {
+  display: flex;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: auto;
+  justify-content: center;
+  align-items: center;
+}
+.ctrlbar > div{
+  cursor: pointer;
+  width: 200px;
+  height: 40px;
+  font-size: 20px;
+  line-height: 40px;
+  text-align: center;
+  opacity: 0.8;
+  /* background: #DDDDDD; */
+}
+.ctrlbar > div.active {
+  border-radius: 5px;
+  opacity: 1;
+  background: #ffffff;
+}
+.test {
+  background-color: var(--bgColor);
+  max-width: 1200px;
+  margin: 20px auto;
+}
+div.ctrl {
+  display: none;
 }
 .ctrl {
-  height: 40px;
-  background: #eee;
+  height: var(--itemHeight);
+  background: var(--bgColor);
 }
 .ctrl ul {
   display: flex;
 }
 .ctrl ul li {
-  height: 40px;
+  height: var(--itemHeight);
   flex: 1;
   display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 .ctrl ul li label {
   flex: 1;
-  max-width: 40px;
+  max-width: var(--maxItemWidth);
   font-size: 16px;
   line-height: 30px;
   display: block;
   padding: 0 10px;
-  margin-top: 5px;
 }
 .ctrl ul li input {
   flex: 3;
@@ -52,7 +94,9 @@ ol {
   border: none;
   padding-left: 20px;
   border-radius: 4px;
-  margin-top: 5px;
+}
+.show-data {
+  margin-top: 20px;
 }
 .show-data > div:nth-of-type(1) > ul {
   display: flex;
@@ -77,18 +121,27 @@ ol {
   text-align: center;
 }
 .show-data > div:nth-of-type(2) > ul:nth-of-type(odd) {
-  background: #ddd;
+  background: var(--inputBgColor);
   display: flex;
   height: 30px;
 }
+
 button {
   min-width: 100px;
-  background: #ddd;
+  background: var(--inputBgColor);
   padding: 5px 10px;
   border: none;
   border-radius: 4px;
   outline: none;
+  cursor: pointer;
 }
 button:active {
-  background: rgba(0, 0, 0, 0.2);
+  opacity: 0.5;
+}
+
+div.hide{
+  display: none;
+}
+div.show{
+  display:block
 }

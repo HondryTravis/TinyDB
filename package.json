@@ -4,19 +4,20 @@
   "main": "lib/core/tinydb.js",
   "license": "MIT",
   "devDependencies": {
-    "@types/axios": "^0.14.0",
-    "browser-sync": "^2.26.5",
-    "del": "^4.1.1",
+    "babel-core": "^6.26.3",
+    "babel-preset-es2015": "^6.24.1",
+    "babelify": "8",
+    "browser-sync": "^2.26.14",
+    "browserify": "^17.0.0",
+    "fancy-log": "^1.3.3",
     "gulp": "^4.0.2",
-    "gulp-less": "^4.0.1",
-    "gulp-rollup": "^2.16.2",
+    "gulp-sourcemaps": "^3.0.0",
     "gulp-uglify": "^3.0.2",
-    "gulp-util": "^3.0.8",
     "gulp-watch": "^5.0.1",
-    "pump": "^3.0.0",
-    "rollup": "^1.12.4",
-    "rollup-plugin-typescript": "^1.0.1",
-    "tslib": "^1.10.0",
-    "typescript": "^3.4.5"
+    "tsify": "^5.0.2",
+    "typescript": "^4.1.3",
+    "vinyl-buffer": "^1.0.1",
+    "vinyl-source-stream": "^2.0.0",
+    "watchify": "^4.0.0"
   }
 }

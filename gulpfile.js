@@ -1,82 +1,98 @@
-const path = require('path')
-const gulp = require('gulp')
-const pump = require('pump')
-const del = require('del')
-const less = require('gulp-less')
-const rollup = require('rollup')
-const rollupTypescript = require('rollup-plugin-typescript')
-const watch = require('gulp-watch')
-const browserSync = require("browser-sync").create(),reload=browserSync.reload;
+const { series, parallel, src, dest } = require('gulp')
 
+// 构建浏览器可以运行的环境
+const browserify = require("browserify");
+// 访问 typescript 编译器的能力， 是 Browserify 的插件，就像 gulp-typescript
+const tsify = require("tsify");
+// 调整 browserify 输出格式能被 gulp 流式访问
+const source = require("vinyl-source-stream");
 
-const cleanLibDir = () => {
-  return del(['./lib'])
+// 引入 watch 
+
+const watch = require("gulp-watch");
+
+// 压缩 js 使用
+const uglify = require("gulp-uglify");
+// 生成代码映射
+const sourcemaps = require("gulp-sourcemaps");
+// 生成 buffer
+const buffer = require("vinyl-buffer");
+
+// 观察 js 变化自动更新
+const watchify = require("watchify");
+// log
+const fancy_log = require("fancy-log");
+
+// 启动一个 http 服务
+const browserSync = require("browser-sync").create()
+const reload = browserSync.reload
+
+const config = {
+  entries: './src/core/Main.ts',
+  output_dir: 'lib',
+  output_name: 'bundle.js',
+  index_dir: './',
+  skin: {
+    entry: './src/skin/index.css',
+    output_dir: 'lib'
+  }
 }
-const build_css = done => {
-  pump([
-    gulp.src('./src/skin/Main.less'),
-    less(),
-    gulp.dest('./lib/skin'),
-    reload({ stream: true })
-  ],done)
-}
-/**
- * 
- * @param { string } entry  必须 
- * @param { string } outDir 必须
- * @param { string } moduleName 必须
- */
-const rollup_build_task = (entry,outDir,moduleName) => {
-  return  rollup.rollup({
-    input: entry,
-    plugins: [
-      rollupTypescript()
-    ]
-  }).then( bundle => {
-    return bundle.write({
-      file: outDir,
-      format:'es',
-      name: moduleName,
-      sourcemap: true
-    })
+
+// gulp 任务流程
+const typescript = watchify(
+  browserify({
+    basedir: ".",
+    debug: true,
+    entries: [config.entries],
+    cache: {},
+    packageCache: {},
+  }).plugin(tsify)
+  .transform('babelify', {
+    presets: ["es2015"],
+    extensions: [".ts"],
   })
+)
+
+typescript.on("update", bundle);
+typescript.on("log", fancy_log);
+
+function bundle() {
+  return typescript
+  .bundle()
+  .on("error", fancy_log)
+  .pipe(source(config.output_name))
+  .pipe(buffer())
+  .pipe(sourcemaps.init({ loadMaps: true }))
+  .pipe(sourcemaps.write("./"))
+    // .pipe(uglify())
+  .pipe(dest(config.output_dir))
+  .pipe(reload({stream:true}))
 }
 
-const build_ts = (done) => {
-    rollup_build_task('./src/core/Main.ts','./lib/core/tinydb.js','tinydb'),
-    reload({ stream: true })
-    done();
-}
-
-const build_html = done => {
-  pump([
-    gulp.src('./*.html'),
-    gulp.dest('./lib/core'),
-    reload({ stream: true })
-  ],done)
-}
-const watch_css = done => {
-  pump([
-    gulp.src('./src/skin/**/*.less'),
-    reload({ stream: true })
-  ],done)
-}
-const watch_js = done => {
-  pump([
-    gulp.src('./src/**/*.ts'),
-    reload({ stream: true })
-  ],done)
-}
-
-const browserServer = () => {
+function devServer() {
   browserSync.init({
     server: {
-      baseDir: "./",
-      tunnel: true  
+      baseDir: config.index_dir,
+      tunnel: true
     }
   })
-  watch('./src/skin/**/*.less',gulp.series(build_css,watch_css))
-  watch('./src/**/*.ts',gulp.series(build_ts,watch_js))
-  watch('./*.html',gulp.series(build_html))
 }
-gulp.task('default',gulp.series(cleanLibDir,build_css,build_ts,browserServer))
+
+function watch_file() {
+  watch('./src/skin/**/*.css', () => {
+    css()
+    reload()
+  })
+  watch('./*.html', () => {
+    reload()
+  })
+}
+
+function css() {
+  return src(config.skin.entry)
+  .pipe(dest(config.skin.output_dir))
+  .pipe(reload({stream:true}))
+}
+
+exports.default = parallel(bundle, css, devServer, watch_file)
+exports.build = series(bundle, css)
