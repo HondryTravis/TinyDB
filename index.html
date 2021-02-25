@@ -322,6 +322,7 @@
   _delete.addEventListener('click', async () => {
     let inputs = document.querySelectorAll(".delete input");
     let data = {};
+   
     await test.deleteRecord("table_student", {
       index: 'id',
       value: +inputs[0].value
@@ -387,7 +388,12 @@
 
   async function showData() {
     const result = await test.getAll("table_student")
+    if(!result.length) {
+      wrap.innerHTML = ``
+      return
+    }
     for (const item of result) {
+      console.log(item)
       const ul = new Element("ul", {
         id: "db-data"
       }, [
@@ -407,6 +413,7 @@
         wrap.append(frame);
       })
     }
+    frame.innerHTML = ``;
   }
 
 </script>
