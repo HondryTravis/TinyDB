@@ -8,7 +8,6 @@ const tsify = require("tsify");
 const source = require("vinyl-source-stream");
 
 // 引入 watch 
-
 const watch = require("gulp-watch");
 
 // 压缩 js 使用
@@ -23,14 +22,16 @@ const watchify = require("watchify");
 // log
 const fancy_log = require("fancy-log");
 
+const rename = require("gulp-rename")
+
 // 启动一个 http 服务
 const browserSync = require("browser-sync").create()
 const reload = browserSync.reload
 
 const config = {
-  entries: './src/core/Main.ts',
+  entries: './src/core/index.ts',
   output_dir: 'lib',
-  output_name: 'bundle.js',
+  output_name: 'tinydb.js',
   index_dir: './',
   skin: {
     entry: './src/skin/index.css',
@@ -64,9 +65,18 @@ function bundle() {
   .pipe(buffer())
   .pipe(sourcemaps.init({ loadMaps: true }))
   .pipe(sourcemaps.write("./"))
-    // .pipe(uglify())
   .pipe(dest(config.output_dir))
   .pipe(reload({stream:true}))
+}
+
+
+function build() {
+  return src('./lib/tinydb.js')
+  .pipe(uglify())
+  .pipe(rename({
+    suffix:'.min'
+  }))
+  .pipe(dest('./lib/'))
 }
 
 function devServer() {
@@ -95,4 +105,4 @@ function css() {
 }
 
 exports.default = parallel(bundle, css, devServer, watch_file)
-exports.build = series(bundle, css)
+exports.build = series(build)

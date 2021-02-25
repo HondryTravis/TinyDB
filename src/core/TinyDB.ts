@@ -1,176 +1,245 @@
-import { DatabaseTable, Database, RuleIndex } from "./types";
-import { Table } from './Table';
-declare const window: any;
-export class TinyDB {
-  openedDB!: IDBOpenDBRequest
-  name: string
-  version!: number 
-  tables: Array<DatabaseTable>
-  constructor(config:Database) {
-    const { databaseName, tables} = config
-    this.name = databaseName
-    this.tables = tables
-    this.createTable(this.tables)
+import Table from "./Table";
+import { ITinyDB } from "./types/index";
+
+
+const IN_DB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+
+export default class TinyDB {
+  private dbName: string;
+  private version: number;
+  private db: IDBDatabase
+  static of() {
+    return new TinyDB
   }
-  createDateBase (name: string, version =1) {
-    const indb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-    this.openedDB =  indb.open(name, version)
+  constructor() { }
+  setup(options: ITinyDB.IDatabase) {
+    const { dbName } = options
+    this.dbName = dbName
+    return this;
   }
-  createTable(tables: Array<DatabaseTable>, version = 1) {  
-      console.log('version create:', version)
-      const indb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-      const conn_request = indb.open(this.name, version)
-      conn_request.onupgradeneeded = (ev:any) => {
-        const db = ev.target.result
-        tables.forEach( (table: DatabaseTable) => {
-          const hadTableNames = Array.from(db.objectStoreNames)
-          if(!hadTableNames.includes(table.name)){
-            const table_info = db.createObjectStore(table.name,{keyPath: table.keyPath, autoIncrement: table.autoIncrement})
-            table.indexs.forEach( item => {
-              this.createIndex(table_info, item)
-            })
-          }
-        })
-      }
+  getVersion() {
+    return this.version ? this.version : 1
   }
-  deleteTable(tableName: string, version: number){
-    const indb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.indexedDB
-    console.log('version delete:', version)
-    const conn_request = indb.open(this.name, version)
-    conn_request.onupgradeneeded = (ev:any) => {
-      const db = ev.target.result;
-      if(ev.oldVersion< version){
-        console.log('我要删除表')
-        db.deleteObjectStore(tableName)
-      }
+  setVersion(version: number) {
+    this.version = version
+  }
+  upgrade() {
+
+  }
+  createTable(options: ITinyDB.ITableConfig[] = undefined) {
+    const { dbName } = this
+    const that = this
+
+    if (options === undefined) {
+      return console.error('database table config must a list')
     }
-  }
-  // create index 
-  createIndex(table: IDBObjectStore ,option: RuleIndex){
-    table.createIndex(option.index, option.relativeIndex, { unique: option.unique })
-  }
-  connect(name: string = '') {
-    return new Promise<IDBDatabase>((resolve, reject)=> { 
-      const indb = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB
-      const conn_request = indb.open(this.name, this.version)
-      conn_request.onsuccess = (ev:any) => {
-        resolve(ev.target.result)
+
+    const request = IN_DB.open(dbName, this.getVersion())
+
+
+    const unlisten = () => {
+      request.removeEventListener('upgradeneeded', upgrade);
+    };
+
+    const upgrade = () => {
+      console.log('upgrade')
+      const db = request.result
+      for (const table of options) {
+        if (!db.objectStoreNames.contains(table.name)) {
+          const record = db.createObjectStore(table.name, {
+            keyPath: table.keyPath,
+            autoIncrement: table.autoIncrement ? true : false
+          })
+          if (table.indexs && table.indexs.length !== 0) {
+            for (const index of table.indexs) {
+              record.createIndex(index.index, index.relativeIndex, { unique: index.unique })
+            }
+          }
+        }
       }
-      conn_request.onerror = (ev:any) => {
-        reject(ev)
+      that.setVersion(db.version)
+      unlisten()
+    }
+
+    request.addEventListener('upgradeneeded', upgrade)
+
+    const promise = new Promise((resolve, reject) => {
+      this.connect(request).then(db => {
+        const versionChange = (evt: IDBVersionChangeEvent) => {
+          console.log('versionchange')
+          db.close()
+          db.removeEventListener('versionchange', versionChange)
+        }
+        db.addEventListener('versionchange', versionChange)
+      })
+    })
+    return promise
+  }
+  deleteDatabase(name: string) {
+   
+    const request = IN_DB.deleteDatabase(name)
+    const promise = new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        console.log(222)
+        const msg: ITinyDB.IState = {
+          msg: 'Database deleted successfully',
+          status: true
+        }
+        resolve(msg)
+      }
+      request.onerror = () => {
+        
+        const msg: ITinyDB.IState = {
+          msg: 'Database deleted failed',
+          status: true,
+          activedRequest: request
+        }
+        reject(msg)
       }
     })
-  } 
-  close() {
-    this.connect().then( (db: IDBDatabase) => {
-      db.close()
-    })
+    return promise
   }
-  insert(name: string, data: any) {
-    return new Promise( (resolve, reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.insert(data).then((res)=> {
-          resolve(res)
-        }).catch( (error) => {
-          reject(error)
-        }); 
-      })
+  connect<T>(request: IDBRequest<T>, options?: ITinyDB.IRequestCallback): Promise<T> {
+
+    const promise = new Promise<T>((resolve, reject) => {
+
+      const unlisten = () => {
+        request.removeEventListener('success', success);
+        request.removeEventListener('error', error);
+      };
+
+      const success = () => {
+        if (options && options.successfully) {
+          options.successfully(request)
+        }
+        resolve(request.result);
+        unlisten()
+      }
+      const blocked = () => {
+        if (options && options.blocked) {
+          options.blocked(request)
+        }
+        console.log('connect blocked')
+      }
+
+      const error = () => {
+        if (options && options.error) {
+          options.error(request)
+        }
+
+        reject(request.error);
+        unlisten()
+      }
+      request.addEventListener('success', success)
+      request.addEventListener('error', error)
+      request.addEventListener('blocked', blocked)
     })
+
+    return promise
   }
-  select(name: string, selecter: any){
-    return new Promise((resolve, reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.select(selecter).then((res:any) =>{
-          resolve(res)
-        }).catch( (err:any) => {
-          reject(err)
+  insert(table_name: string, record: any) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
         })
+        operator.insert(record).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
   }
-  selectId(name:string, id:number){
-    return new Promise((resolve, reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.selectId(id).then((res:any) =>{
-          resolve(res)
-        }).catch( (err:any) => {
-          reject(err)
+  update(table_name: string, index: ITinyDB.IValidateKey, record: any) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
         })
+        operator.update(index, record).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
   }
-  some(name:string, index: any, startIndex: any, endIndex: any) {
-    return new Promise((resolve, reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.some(index, startIndex, endIndex).then( (res:any) => {
-          resolve(res)
-        }).catch( (error: any)=> {
-          reject(error)
+  getAll(table_name: string) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
         })
+        operator.getAll().then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
   }
-  // exec(way: string, db: IDBDatabase, name: string,  data: any, resolve:Function,  reject:Function) {
-  //   const table = new Table(name, db)
-  //   const ways = ['select', 'insert', 'delete', 'update'] 
-  //   if(ways.includes(way)){
-  //     table[way](data).then((res:any) =>{
-  //       resolve(res)
-  //     }).catch( (err:any) => {
-  //       reject(err)
-  //     })
-  //   }
-  // }
-  update(name: string, data: any){
-    return new Promise( (resolve, reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.update(data).then((res:any) =>{
-          resolve(res)
-        }).catch( (err:any) => {
-          reject(err)
+  getByPrimaryKey(table_name: string, key: ITinyDB.IValidateKey) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
         })
+        operator.getByPrimaryKey(key).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
   }
-  delete(name: string, data: any) {
-    return new Promise( (resolve,reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.delete(data).then((res:any) =>{
-          resolve(res)
-        }).catch( (err:any) => {
-          reject(err)
+  getByIndex(table_name: string, options: ITinyDB.IGetIndex) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
         })
+        operator.getByIndex(options).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
   }
-  selectAll(name: string) {
-    return new Promise( (resolve,reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.selectAll().then((res:any) =>{
-          resolve(res)
-        }).catch( (err:any) => {
-          reject(err)
+  deleteRecord(table_name: string, options: ITinyDB.IGetIndex) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
         })
+        operator.deleteRecord(options).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
   }
-  clearTable(name: string) {
-    return new Promise((resolve, reject) => {
-      this.connect().then( (db: IDBDatabase) => {
-        const table = new Table(name, db)
-        table.clear().then( (res: any) => {
-          resolve(res)
-        }).catch( (error:any) => {
-          reject(error)
+  some(table_name: string, options: ITinyDB.ISomeOptions) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
         })
+        operator.some(options).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
+  }
+  clearTableRecord(table_name: string) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
+        })
+        operator.clear().then(res => resolve(res)).catch((err) => reject(err))
+      })
+    })
+    return promise
   }
 }
+

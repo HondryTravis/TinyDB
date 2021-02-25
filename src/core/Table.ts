@@ -1,136 +1,193 @@
-export class Table {
-  name: string
-  db: IDBDatabase
-  constructor(name: string, db:IDBDatabase){
+import { ITinyDB } from "./types/index";
+
+// 操作 table 使用
+export default class Table {
+  static of(option: ITinyDB.IInvokeTable) {
+    return new Table(option)
+  }
+  private name: string
+  private db: IDBDatabase | undefined;
+  private mode: ITinyDB.IOperateMode = 'readwrite'
+  constructor(option: ITinyDB.IInvokeTable) {
+    const { name, db } = option
     this.name = name
     this.db = db
   }
+  setMode(mode: ITinyDB.IOperateMode) {
+    this.mode = mode
+  }
+  getMode() {
+    return this.mode
+  }
   // create transaction 
-  transaction(mode = true) {
-    return this.db.transaction([this.name], mode === true ? 'readwrite' : 'readonly')
+  transaction(name: string) {
+    const transaction = this.db.transaction([name], this.getMode())
+    return transaction
   }
   // open or conntect this table 
-  request() {
-    return this.transaction().objectStore(this.name)
+  requestStore() {
+    const { name } = this
+    return this.transaction(name).objectStore(name)
   }
-  // get
-  select(selector: any){
-    console.log(1)
-    let index: string
-    let indexValue: any
-    for(let name in  selector){
-      index = name;
-      indexValue = selector[name]
-    }
-    return new Promise((resolve,reject)=>{
-      const selectRequest = this.request().index(index).getAll(indexValue)
-      selectRequest.onsuccess = (e:any) => {
-        resolve(e.target.result)
+  insert(record: any) {
+    const promise = new Promise((resolve, reject) => {
+      const addRequest = this.requestStore().put(record)
+      const unlisten = () => {
+        addRequest.removeEventListener('success', success)
+        addRequest.removeEventListener('error', error)
       }
-      selectRequest.onerror = (e:any) => {
-        reject(e.target.result)
+      const success = () => {
+        resolve({
+          msg: 'add one record successfully!',
+          status: true
+        })
+        unlisten()
       }
+      const error = () => {
+        resolve({
+          msg: 'add one record failed!',
+          status: false
+        })
+      }
+      addRequest.addEventListener('success', success)
+      addRequest.addEventListener('error', error)
     })
+    return promise
   }
-  selectId(id:number) {
-    return new Promise((resolve,reject)=>{
-      const selectRequest = this.request().get(id)
-      selectRequest.onsuccess = (e:any) => {
-        resolve(e.target.result)
-      }
-      selectRequest.onerror = (e:any) => {
-        reject(e.target.result)
-      }
-    })
-  }
-  selectAll(){
-    return new Promise((resolve,reject)=>{
-      const selectRequest = this.request().getAll()
-      selectRequest.onsuccess = (e:any) => {
-        resolve(e.target.result)
-      }
-      selectRequest.onerror = (e:any) => {
-        reject(e.target.result)
-      }
-    })
-  }
-  // some 
-  some(index: any, start:any, end:any) {
-  return new Promise((resolve, reject) => {
-    const temp:any = [];
-    const cursor =  this.request().index(index);
-    const range = IDBKeyRange.bound(start, end)
-    cursor.openCursor(range).onsuccess = (ev:any ) => {
-       const res = ev.target.result;
-       if(res){
-        temp.push(res.value)
-        res.continue()
-       }else{
-         console.log('数据抽取结束')
-         resolve(temp)
-       }
-    }
-    cursor.openCursor(range).onerror = (ev: any) => {
-      reject(ev)
-    }
-  })
-  }
-  // put 
-  update(data: any) {
-    return new Promise( (resolve, reject) => {
-      const updateRequest =  this.request().put(data)
-      updateRequest.onsuccess = (e:any) => {
-        resolve(e)
-      }
-      updateRequest.onerror = (e:any) => {
-        reject(e)
-      }
-    })
-  }
-  // add 
-  insert(data: any) {
-   
-    return new Promise( (resolve, reject) => {
-      const addRequest = this.request().add(data)
-      addRequest.onsuccess = (e:any) => {
-        resolve(e)
-      }
-      addRequest.onerror = (e:any) => {
-        reject(e)
-      }
-    }) 
-  }
-  // get -> delete
-  delete(selector: any) {
-    return new Promise( (resolve, reject) => {
-      this.select(selector).then( (res: any) => {
-        if(res.length) {
-          res.forEach( (item: any, index: any, arr: any) => {
-            const request = this.request()
-            const keyPath = request.keyPath as string
-            const deleteRequest = request.delete(item[keyPath])
-            deleteRequest.onsuccess = (e: any) => {
-              if(index === arr.length-1) {
-                resolve(e)
-              }
-            }
-            deleteRequest.onerror = (e: any) => {
-              reject(e)
-            }
+  update(index: ITinyDB.IValidateKey, record: any) {
+    const promise = new Promise((resolve, reject) => {
+      const getRequest = this.requestStore().get(index);
+      getRequest.onsuccess = () => {
+        const data = getRequest.result
+        const update_data = {
+          ...data,
+          ...record
+        }
+        const updateRequest = this.requestStore().put(update_data);
+        updateRequest.onsuccess = () => {
+          resolve({
+            msg: 'update successfully!',
+            activedRequest: updateRequest
           })
+        }
+        updateRequest.onerror = () => {
+          reject({
+            msg: 'update failed!',
+            activedRequest: updateRequest
+          })
+        }
+      }
+      getRequest.onerror = () => {
+        reject({
+          msg: 'get failed!',
+          activedRequest: getRequest
+        })
+      }
+    })
+    return promise
+  }
+  getByPrimaryKey(id: ITinyDB.IValidateKey) {
+    return new Promise((resolve, reject) => {
+      const getRequest = this.requestStore().get(id)
+      getRequest.onsuccess = () => {
+        resolve(getRequest.result)
+      }
+      getRequest.onerror = () => {
+        reject(getRequest.result)
+      }
+    })
+  }
+  getByIndex(option: ITinyDB.IGetIndex) {
+    const { index, value } = option
+    return new Promise((resolve, reject) => {
+      const getRequest = this.requestStore().index(index).getAll(value)
+      getRequest.onsuccess = () => {
+        resolve(getRequest.result)
+      }
+      getRequest.onerror = () => {
+        reject(getRequest.result)
+      }
+    })
+  }
+  getAll() {
+    return new Promise((resolve, reject) => {
+      const getRequest = this.requestStore().getAll()
+      getRequest.onsuccess = () => {
+        resolve(getRequest.result)
+      }
+      getRequest.onerror = () => {
+        reject(getRequest.result)
+      }
+    })
+  }
+  some(option: ITinyDB.ISomeOptions) {
+    const { index, lower, upper } = option
+    return new Promise((resolve, reject) => {
+      const cache: any = [];
+      const cursor = this.requestStore().index(index);
+      const range = IDBKeyRange.bound(lower, upper)
+      const rangeRequest = cursor.openCursor(range)
+      rangeRequest.onsuccess = () => {
+        const result = rangeRequest.result;
+        if (result) {
+          cache.push(result.value)
+          result.continue()
+        } else {
+          resolve(cache)
+        }
+      }
+      rangeRequest.onerror = () => {
+        reject(rangeRequest.error)
+      }
+    })
+  }
+  deleteRecord(option: ITinyDB.IGetIndex) {
+    return new Promise((resolve, reject) => {
+      this.getByIndex(option).then((data: any[]) => {
+
+        if (!data.length) {
+          return console.warn('not find this record')
+        }
+
+        for (const item of data) {
+          const store = this.requestStore()
+          const { keyPath } = store
+          const deleteRequest = store.delete(item[keyPath as string])
+          deleteRequest.onsuccess = () => {
+            resolve({
+              msg: 'delete successfully!',
+              status: true
+            })
+          }
+          deleteRequest.onerror = () => {
+            reject({
+              msg: 'delete failed!',
+              status: false
+            })
+          }
         }
       })
     })
   }
   clear() {
     return new Promise( (resolve, reject) => {
-      const deleteRequest = this.request().clear()
-      deleteRequest.onsuccess = (e: any) => {
-        resolve(e)
+      const clearRequest = this.requestStore().clear()
+      clearRequest.onsuccess = () => {
+        resolve({
+          msg: 'clear successfully!',
+          status: true
+        })
       }
-      deleteRequest.onerror = (e: any) => {
-        reject(e)
+      clearRequest.onerror = () => {
+        reject({
+          msg: 'clear failed!',
+          status: false
+        })
       }
     })
+  }
+  destroyed() {
+    this.db = undefined
+    this.name = ''
   }
 }

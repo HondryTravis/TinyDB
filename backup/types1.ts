@@ -28,8 +28,8 @@ export interface TinyDBRule {
 }
 
 export interface TableFn {
-  select(): any
-  update(): any 
-  insert(): any 
-  delete(): any 
+  select<T>(): Promise<T>
+  update<T>(): Promise<T> 
+  insert<T>(): Promise<T> 
+  delete<T>(): Promise<T> 
 }

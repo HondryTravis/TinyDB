@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "lib": ["DOM","ESNext"],
-    "target": "es5"                
+    "target": "es5",
+    "allowJs": false
   },
   "include": [
-    "src/**/*.ts",
-    "src/global.d.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules"
