@@ -22,13 +22,35 @@ export default class TinyDB {
   }
   setVersion(version: number) {
     this.version = version
+    return this
   }
-  upgrade() {
+  upgrade(db: IDBDatabase, options: ITinyDB.ITableConfig[]) {
+    this.setVersion(db.version)
+    this.db = db
 
+    for (const table of options) {
+      if (!db.objectStoreNames.contains(table.name)) {
+        const store = db.createObjectStore(table.name, {
+          keyPath: table.primaryKey,
+          autoIncrement: table.autoIncrement ? true : false
+        })
+        if (table.indexs && table.indexs.length !== 0) {
+          for (const index of table.indexs) {
+            this.createIndex(store, {
+              index: index.index,
+              relativeIndex: index.relativeIndex,
+              unique: index.unique
+            })
+          }
+        }
+      }
+    }
+  }
+  createIndex(db: IDBObjectStore, options: ITinyDB.IIndex) {
+    db.createIndex(options.index, options.relativeIndex, { unique: options.unique })
   }
   createTable(options: ITinyDB.ITableConfig[] = undefined) {
     const { dbName } = this
-    const that = this
 
     if (options === undefined) {
       return console.error('database table config must a list')
@@ -36,28 +58,12 @@ export default class TinyDB {
 
     const request = IN_DB.open(dbName, this.getVersion())
 
-
     const unlisten = () => {
       request.removeEventListener('upgradeneeded', upgrade);
     };
 
     const upgrade = () => {
-      console.log('upgrade')
-      const db = request.result
-      for (const table of options) {
-        if (!db.objectStoreNames.contains(table.name)) {
-          const record = db.createObjectStore(table.name, {
-            keyPath: table.keyPath,
-            autoIncrement: table.autoIncrement ? true : false
-          })
-          if (table.indexs && table.indexs.length !== 0) {
-            for (const index of table.indexs) {
-              record.createIndex(index.index, index.relativeIndex, { unique: index.unique })
-            }
-          }
-        }
-      }
-      that.setVersion(db.version)
+      this.upgrade(request.result, options)
       unlisten()
     }
 
@@ -150,7 +156,7 @@ export default class TinyDB {
     })
     return promise
   }
-  update(table_name: string, index: ITinyDB.IValidateKey, record: any) {
+  updateRecord(table_name: string, options: ITinyDB.IGetIndex, record: any) {
     const promise = new Promise((resolve, reject) => {
       const request = IN_DB.open(this.dbName, this.getVersion())
       this.connect(request).then((db: IDBDatabase) => {
@@ -158,7 +164,7 @@ export default class TinyDB {
           name: table_name,
           db
         })
-        operator.update(index, record).then(res => resolve(res)).catch((err) => reject(err))
+        operator.update(options, record).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
     return promise
@@ -213,6 +219,34 @@ export default class TinyDB {
         operator.deleteRecord(options).then(res => resolve(res)).catch((err) => reject(err))
       })
     })
+    return promise
+  }
+  deleteTable(tableName: string){
+    const promise = new Promise((resolve, reject)=> {
+      const conn_request = IN_DB.open(this.dbName, this.getVersion())
+      conn_request.onupgradeneeded = (evt: IDBVersionChangeEvent) => {
+        const db = conn_request.result;
+
+        this.db = db
+        this.setVersion(db.version)
+
+        if(evt.oldVersion < this.getVersion()){
+          db.deleteObjectStore(tableName)
+        }
+      }
+      conn_request.onsuccess = () => {
+        console.log(this)
+        resolve({
+          msg:' deleted table successfully!'
+        })
+      }
+      conn_request.onerror = () => {
+        reject({
+          msg:' deleted table failed!'
+        })
+      }
+    })
+    
     return promise
   }
   some(table_name: string, options: ITinyDB.ISomeOptions) {

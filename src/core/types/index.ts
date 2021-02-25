@@ -16,16 +16,15 @@ export declare namespace ITinyDB {
   
   export interface ITableConfig {
     name: string
-    keyPath: string
+    primaryKey: string
     autoIncrement: boolean
     indexs: Array<IIndex>
   }
   
   export interface IIndex{
     index: string
-    relativeIndex: string
+    relativeIndex: string | string[]
     unique: boolean,
-    index_type?: key_index
   }
   
   export interface IState {

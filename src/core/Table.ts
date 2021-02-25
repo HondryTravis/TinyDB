@@ -15,6 +15,7 @@ export default class Table {
   }
   setMode(mode: ITinyDB.IOperateMode) {
     this.mode = mode
+    return this
   }
   getMode() {
     return this.mode
@@ -31,7 +32,7 @@ export default class Table {
   }
   insert(record: any) {
     const promise = new Promise((resolve, reject) => {
-      const addRequest = this.requestStore().put(record)
+      const addRequest = this.requestStore().add(record)
       const unlisten = () => {
         addRequest.removeEventListener('success', success)
         addRequest.removeEventListener('error', error)
@@ -39,14 +40,16 @@ export default class Table {
       const success = () => {
         resolve({
           msg: 'add one record successfully!',
-          status: true
+          status: true,
+          // activedRequest: addRequest
         })
         unlisten()
       }
       const error = () => {
-        resolve({
+        reject({
           msg: 'add one record failed!',
-          status: false
+          status: false,
+          activedRequest: addRequest
         })
       }
       addRequest.addEventListener('success', success)
@@ -54,46 +57,50 @@ export default class Table {
     })
     return promise
   }
-  update(index: ITinyDB.IValidateKey, record: any) {
+  update(option: ITinyDB.IGetIndex, record: any) {
     const promise = new Promise((resolve, reject) => {
-      const getRequest = this.requestStore().get(index);
-      getRequest.onsuccess = () => {
-        const data = getRequest.result
-        const update_data = {
-          ...data,
-          ...record
+      const { index, value } = option
+      this.getByIndex(option).then((result: any[]) => {
+        if (!result.length) {
+          return console.warn('not found this record')
         }
-        const updateRequest = this.requestStore().put(update_data);
-        updateRequest.onsuccess = () => {
-          resolve({
-            msg: 'update successfully!',
-            activedRequest: updateRequest
-          })
+        for (const item of result) {
+          const store = this.requestStore()
+          const newRecord = {
+            ...item,
+            ...record
+          }
+          const updateRequest = store.put(newRecord)
+          updateRequest.onsuccess = () => {
+            resolve({
+              msg: 'update successfully!',
+              status: true,
+            })
+          }
+          updateRequest.onerror = () => {
+            reject({
+              msg: 'update failed!',
+              status: false,
+              activedRequest: updateRequest
+            })
+          }
         }
-        updateRequest.onerror = () => {
-          reject({
-            msg: 'update failed!',
-            activedRequest: updateRequest
-          })
-        }
-      }
-      getRequest.onerror = () => {
-        reject({
-          msg: 'get failed!',
-          activedRequest: getRequest
-        })
-      }
+      })
     })
     return promise
   }
-  getByPrimaryKey(id: ITinyDB.IValidateKey) {
+  getByPrimaryKey(primaryKey: ITinyDB.IValidateKey) {
     return new Promise((resolve, reject) => {
-      const getRequest = this.requestStore().get(id)
+      const getRequest = this.requestStore().get(primaryKey)
       getRequest.onsuccess = () => {
         resolve(getRequest.result)
       }
       getRequest.onerror = () => {
-        reject(getRequest.result)
+        reject({
+          msg: 'not found this primary key!',
+          status: false,
+          activedRequest: getRequest
+        })
       }
     })
   }
@@ -102,10 +109,18 @@ export default class Table {
     return new Promise((resolve, reject) => {
       const getRequest = this.requestStore().index(index).getAll(value)
       getRequest.onsuccess = () => {
-        resolve(getRequest.result)
+        if(getRequest.result.length) {
+          resolve(getRequest.result)
+        } else {
+          console.warn('not find record!')
+        }
       }
       getRequest.onerror = () => {
-        reject(getRequest.result)
+        reject({
+          msg: 'not found this index!',
+          status: false,
+          activedRequest: getRequest
+        })
       }
     })
   }
@@ -141,7 +156,7 @@ export default class Table {
       }
     })
   }
-  deleteRecord(option: ITinyDB.IGetIndex) {
+  deleteRecord(option: ITinyDB.IGetIndex){
     return new Promise((resolve, reject) => {
       this.getByIndex(option).then((data: any[]) => {
 
@@ -170,7 +185,7 @@ export default class Table {
     })
   }
   clear() {
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const clearRequest = this.requestStore().clear()
       clearRequest.onsuccess = () => {
         resolve({
@@ -181,7 +196,8 @@ export default class Table {
       clearRequest.onerror = () => {
         reject({
           msg: 'clear failed!',
-          status: false
+          status: false,
+          activedRequest: clearRequest
         })
       }
     })

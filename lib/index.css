@@ -95,9 +95,6 @@ div.ctrl {
   padding-left: 20px;
   border-radius: 4px;
 }
-.show-data {
-  margin-top: 20px;
-}
 .show-data > div:nth-of-type(1) > ul {
   display: flex;
 }
@@ -144,4 +141,11 @@ div.hide{
 }
 div.show{
   display:block
+}
+
+div.tip {
+  text-align: center;
+  height: 20px;
+  margin: 10px 0;
+  background: lightskyblue;
 }

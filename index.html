@@ -20,10 +20,10 @@
   <div class="test">
     <div class="ctrl add show">
       <ul>
-        <li class="use-id">
+        <!-- <li class="use-id">
           <label for="">ID</label>
           <input type="text" class="id" placeholder="请输入id" />
-        </li>
+        </li> -->
         <li class="use-name">
           <label for="">姓名</label>
           <input type="text" class="name" placeholder="请输入姓名" />
@@ -96,6 +96,7 @@
     </div>
   </div>
   <h2>预览 previews</h2>
+  <div class="tip"></div>
   <div class="show-data">
     <div class="show-head">
       <ul>
@@ -112,11 +113,21 @@
 <script>
   const ctrlbar = document.querySelector('.ctrlbar');
   const testNode = document.querySelector('.test');
+  const add = document.querySelector("#addData");
+  const put = document.querySelector("#putData");
+  const _delete = document.querySelector("#deleteData");
+  const query = document.querySelector("#queryData");
+  const tip = document.querySelector('div.tip')
+  let wrap = document.querySelector("#showData");
+  let frame = document.createDocumentFragment();
+
+
   const cache = {
     ctrlbar: [ctrlbar.children[0]],
     test: [testNode.children[0]]
   }
   ctrlbar.addEventListener('click', function (e) {
+    const allInput = document.querySelectorAll('input');
     if (Reflect.ownKeys(e.target.dataset).length === 0) {
       return false
     }
@@ -128,73 +139,88 @@
       cache.test[0].classList.remove('show')
       cache.test.length = 0
     }
+    tip.innerHTML = ``;
     cache.ctrlbar.push(e.target)
     for (const key in e.target.dataset) {
       const showNode = testNode.querySelector(`.${key}`)
+      tip.innerHTML = (key !== 'add' ? `use id ${key}`: '');
       showNode.classList.add('show')
       cache.test.push(showNode)
     }
-    console.dir(e.target)
     e.target.classList.add('active')
+    allInput.forEach(input => {
+      input.value = ''
+    })
   })
   const tables = [{
-    name: "table_student",
-    keyPath: "id",
-    autoIncrement: true,
-    indexs: [{
-        index: "id",
-        relativeIndex: "id",
-        unique: true
-      },
-      {
-        index: "name",
-        relativeIndex: "name",
-        unique: false
-      },
-      {
-        index: "school",
-        relativeIndex: "school",
-        unique: false
-      }
-    ]
-  },{
-    name: "table_delete",
-    keyPath: "id",
-  },
-  {
-    name: "table_delete1",
-    keyPath: "id",
-  }]
-  
-  const test = TinyDB.of()
+      name: "table_student",
+      primaryKey: "id",
+      autoIncrement: true,
+      indexs: [{
+          index: "id",
+          relativeIndex: "id",
+          unique: true
+        },
+        {
+          index: "name",
+          relativeIndex: "name",
+          unique: false
+        },
+        {
+          index: "school",
+          relativeIndex: "school",
+          unique: false
+        }
+      ]
+    }, {
+      name: "table_delete",
+      primaryKey: "id",
+    },
+    {
+      name: "table_delete1",
+      primaryKey: "id",
+    }
+  ]
 
+  const test = TinyDB.of()
+  test.setup({
+    dbName: 'test',
+    version: 1
+  })
   async function init() {
-    const result = await  test.setup({dbName: 'test'}).createTable(tables)
+    const result = await test.createTable(tables)
     console.log(result)
   }
   init()
 
-
+  async function addTable() {
+    const result = await test.setVersion(2).createTable([{
+      name: "add_table",
+      keyPath: "id",
+    }])
+    console.log(result)
+  }
+  // addTable()
   async function test_insert() {
     await test.insert('table_student', {
-      name: '李1',
-      school: '北京大学1'
+      name: 'lee1',
+      school: 'Github1',
     })
     await test.insert('table_student', {
-      name: '李2',
-      school: '北京大学2'
+      name: 'lee2',
+      school: 'Github2',
     })
     await test.insert('table_student', {
-      name: '李3',
-      school: '北京大学3'
+      name: 'lee3',
+      school: 'Github3'
     })
     await test.insert('table_student', {
-      name: '李4',
-      school: '北京大学4'
+      name: 'lee4',
+      school: 'Github4'
     })
     await test.insert('table_student', {
-      name: '李5',
-      school: '北京大学5'
+      name: 'lee5',
+      school: 'Github5'
     })
   }
   // test_insert()
@@ -216,7 +242,13 @@
   // test_some()
 
   async function test_update() {
-    const result = await test.update('table_student', '李3', {name: '李 11'})
+    const newData = {
+      name: 'lee11'
+    }
+    const result = await test.updateRecord('table_student', {
+      index: 'id',
+      value: 1
+    }, newData)
     console.log(result)
   }
   // test_update()
@@ -229,19 +261,20 @@
 
   async function test_getByIndex() {
     const result = await test.getByIndex('table_student', {
-      index:'id',
-      value: 3
+      index: 'id',
+      value: 2
     })
     console.log(result)
   }
   // test_getByIndex()
-  async function test_deleteRecord(){
+
+  async function test_deleteRecord() {
     const result = await test.deleteRecord('table_student', {
-      index:'id',
+      index: 'id',
       value: 6
     })
     console.log(result)
-  } 
+  }
   // test_deleteRecord()
 
   async function test_deleteDatabase() {
@@ -254,103 +287,75 @@
     const result = await test.clearTableRecord('table_student')
     console.log(result)
   }
-  test_clearTableRecord()
+  // test_clearTableRecord()
 
-  const add = document.querySelector("#addData");
-  const put = document.querySelector("#putData");
-  const _delete = document.querySelector("#deleteData");
-  const query = document.querySelector("#queryData");
-  let wrap = document.querySelector("#showData");
-  let frame = document.createDocumentFragment();
+  async function test_deleteTable() {
+    const result = await test.setVersion(3).deleteTable('table_delete')
+    console.log(result)
+  }
+  // test_deleteTable()
 
-  // showData();
-  // add.addEventListener('click', () => {
-  //   let inputs = document.querySelectorAll(".add input");
-  //   let data = {
-  //     name: inputs[1].value,
-  //     school: inputs[2].value
-  //   };
-  //   if (inputs[0].value !== "") data.id = +inputs[0].value;
-  //   test.insert("table_student", data);
-  //   requestAnimationFrame(()=> showData())
-  // })
-  // put.addEventListener('click', ()=> {
-  //   let inputs = document.querySelectorAll(".put input");
-  //   let data = {
-  //     name: inputs[1].value,
-  //     school: inputs[2].value
-  //   };
-  //   if (inputs[0].value !== "") data.id = +inputs[0].value;
-  //   test.update("table_student", data);
-  //   requestAnimationFrame(()=> showData())
-  // })
-  // _delete.addEventListener('click', () => {
-  //   let inputs = document.querySelectorAll(".delete input");
-  //   let data = {};
-  //   inputs.forEach(item => {
-  //     if (item.value !== "") {
-  //       data[`${item.className}`] = item.value;
-  //       test.delete("table_student", data).then(res => {
-  //         requestAnimationFrame(()=> showData())
-  //       });
-  //     }
-  //   });
-  // })
-  // query.addEventListener('click', () => {
-  //   let inputs = document.querySelectorAll(".query input");
-  //   let data = {};
-  //   inputs.forEach(item => {
-  //     if (item.value !== "") {
-  //       if (item.className === "id") {
-  //         data[`${item.className}`] = parseInt(item.value);
-  //         test.selectId("table_student", parseInt(item.value)).then(res => {
-  //           console.log(res)
-  //           const ul = new Element("ul", {
-  //             id: "db-data"
-  //           }, [
-  //             new Element("li", {
-  //               class: "id"
-  //             }, [`${res.id}`]),
-  //             new Element("li", {
-  //               class: "name"
-  //             }, [`${res.name}`]),
-  //             new Element("li", {
-  //               class: "school"
-  //             }, [`${res.school}`])
-  //           ]);
-  //           frame.append(ul.render());
+  showData();
+  add.addEventListener('click', async () => {
+    let inputs = document.querySelectorAll(".add input");
+    let data = {
+      name: inputs[1].value,
+      school: inputs[2].value
+    };
+    await test.insert("table_student", data);
+    requestAnimationFrame(() => showData())
+  })
+  put.addEventListener('click', async () => {
+    let inputs = document.querySelectorAll(".put input");
+    let data = {
+      name: inputs[1].value,
+      school: inputs[2].value
+    };
+    if (inputs[0].value !== "") data.id = +inputs[0].value;
 
-  //           wrap.innerHTML = ``;
-  //           wrap.append(frame);
-  //         });
-  //       } else {
-  //         data[`${item.className}`] = item.value;
-  //         test.select("table_student", data).then(res => {
-  //           res.forEach(item => {
-  //             const ul = new Element("ul", {
-  //               id: "db-data"
-  //             }, [
-  //               new Element("li", {
-  //                 class: "id"
-  //               }, [`${item.id}`]),
-  //               new Element("li", {
-  //                 class: "name"
-  //               }, [`${item.name}`]),
-  //               new Element("li", {
-  //                 class: "school"
-  //               }, [`${item.school}`])
-  //             ]);
-  //             // console.log(ul)
-  //             frame.append(ul.render());
-  //           });
-  //           wrap.innerHTML = ``;
-  //           wrap.append(frame);
-  //         });
-  //       }
-  //     }
-  //   });
-  //   frame.innerHTML = ``;
-  // })
+    await test.updateRecord("table_student", {
+      index: 'id',
+      value: data.id
+    }, data)
+    requestAnimationFrame(() => showData())
+  })
+  _delete.addEventListener('click', async () => {
+    let inputs = document.querySelectorAll(".delete input");
+    let data = {};
+    await test.deleteRecord("table_student", {
+      index: 'id',
+      value: +inputs[0].value
+    });
+    requestAnimationFrame(() => showData())
+  })
+  query.addEventListener('click', async () => {
+    let inputs = document.querySelectorAll(".query input");
+    let data = {};
+    console.log(inputs[0].value)
+    const result = await test.getByIndex('table_student', {
+      index: 'id',
+      value: +inputs[0].value
+    })
+    for (const item of result) {
+      const ul = new Element("ul", {
+        id: "db-data"
+      }, [
+        new Element("li", {
+          class: "id"
+        }, [`${item.id}`]),
+        new Element("li", {
+          class: "name"
+        }, [`${item.name}`]),
+        new Element("li", {
+          class: "school"
+        }, [`${item.school}`])
+      ]);
+      frame.append(ul.render());
+      wrap.innerHTML = ``;
+      wrap.append(frame);
+    }
+    frame.innerHTML = ``;
+  })
 
   const Element = function (tagName, props, children) {
     this.tagName = tagName;
@@ -380,29 +385,28 @@
     return new Element(tagName, props, children);
   };
 
-  function showData() {
-    test.selectAll("table_student").then(res => {
-      res.forEach(item => {
-        const ul = new Element("ul", {
-          id: "db-data"
-        }, [
-          new Element("li", {
-            class: "id"
-          }, [`${item.id}`]),
-          new Element("li", {
-            class: "name"
-          }, [`${item.name}`]),
-          new Element("li", {
-            class: "school"
-          }, [`${item.school}`])
-        ]);
-        frame.append(ul.render());
-      });
+  async function showData() {
+    const result = await test.getAll("table_student")
+    for (const item of result) {
+      const ul = new Element("ul", {
+        id: "db-data"
+      }, [
+        new Element("li", {
+          class: "id"
+        }, [`${item.id}`]),
+        new Element("li", {
+          class: "name"
+        }, [`${item.name}`]),
+        new Element("li", {
+          class: "school"
+        }, [`${item.school}`])
+      ]);
+      frame.append(ul.render());
       wrap.innerHTML = ``;
       requestAnimationFrame(() => {
         wrap.append(frame);
       })
-    });
+    }
   }
 
 </script>
