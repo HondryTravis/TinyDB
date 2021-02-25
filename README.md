@@ -89,7 +89,7 @@ async function test_insert() {
 test_insert()
 ```
 
-## getAll
+## 🔨 getAll
 
 获得选中表格所有数据
 
@@ -101,7 +101,7 @@ test_insert()
   // test_getAll()
 ```
 
-## some
+## 🔨 some
 
 获取一些数据，lower <= rang <= upper
 
@@ -117,7 +117,7 @@ test_insert()
   // test_some()
 ```
 
-## updateRecord
+## 🔨 updateRecord
 
 更新数据
 
@@ -135,7 +135,7 @@ test_insert()
   // test_update()
 ```
 
-## getByPrimaryKey
+## 🔨 getByPrimaryKey
 
 通过主键检索数据
 
@@ -147,7 +147,7 @@ test_insert()
   // test_getByPrimaryKey()
 ```
 
-## getByIndex
+## 🔨 getByIndex
 
 通过创建的索引检索数据
 
@@ -162,7 +162,7 @@ test_insert()
   // test_getByIndex()
 ```
 
-## deleteRecord
+## 🔨 deleteRecord
 
 删除记录，通过创建的索引删除
 
@@ -177,7 +177,7 @@ test_insert()
   // test_deleteRecord()
 ```
 
-## deleteDatabase
+## 🔨 deleteDatabase
 
 删除数据库
 
