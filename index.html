@@ -299,8 +299,8 @@
   add.addEventListener('click', async () => {
     let inputs = document.querySelectorAll(".add input");
     let data = {
-      name: inputs[1].value,
-      school: inputs[2].value
+      name: inputs[0].value,
+      school: inputs[1].value
     };
     await test.insert("table_student", data);
     requestAnimationFrame(() => showData())
