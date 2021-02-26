@@ -76,7 +76,7 @@
  const tables = [
         {
           name: "table_student",
-          keyPath: "id",
+          primaryKey: "id",
           autoIncrement: true,
           indexs: [
             {
