@@ -105,6 +105,11 @@ export default class Table {
     })
   }
   getByIndex(option: ITinyDB.IGetIndex) {
+
+    if(!option) {
+      return Promise.resolve([])
+    }
+
     const { index, value } = option
     return new Promise((resolve, reject) => {
       const getRequest = this.requestStore().index(index).getAll(value)
