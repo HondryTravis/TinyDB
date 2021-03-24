@@ -106,7 +106,7 @@ export default class Table {
   }
   getByIndex(option: ITinyDB.IGetIndex) {
 
-    if(!option) {
+    if(!option || !option.value) {
       return Promise.resolve([])
     }
 
