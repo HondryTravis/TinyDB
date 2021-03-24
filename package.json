@@ -1,7 +1,9 @@
 {
   "name": "tinydb",
   "version": "1.0.0",
-  "main": "lib/core/tinydb.js",
+  "main": "dist/TinyDB.global.js",
+  "module": "dist/TinyDB.cjs.js",
+  "author": "travis",
   "license": "MIT",
   "scripts": {
     "build": "rollup -c"

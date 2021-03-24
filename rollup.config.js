@@ -49,6 +49,10 @@ function createConfig(format, output, plugins = []) {
     process.exit(1)
   }
 
+  if(format === 'iife') {
+    output.name = 'TinyDB'
+  }
+
   const extensions = ['.ts']
   const noDeclaration = false
 
