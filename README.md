@@ -6,6 +6,8 @@ easy to use multi-table indexeddb lib
 
 [中文文档 zh-CN](docs/ApiDocument.md)
 
+[查看 demo](https://hondrytravis.github.io/TinyDB/)
+
 ## 🌟 quick start dev
 
 ```sh
