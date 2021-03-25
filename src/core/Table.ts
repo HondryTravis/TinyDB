@@ -62,7 +62,8 @@ export default class Table {
       const { index, value } = option
       this.getByIndex(option).then((result: any[]) => {
         if (!result.length) {
-          return console.warn('not found this record')
+          console.warn('not found this record')
+          return false
         }
         for (const item of result) {
           const store = this.requestStore()
@@ -107,9 +108,10 @@ export default class Table {
   getByIndex(option: ITinyDB.IGetIndex) {
 
     if(!option || !option.value) {
-      return Promise.resolve([])
+      return Promise.reject({
+        msg: 'must have one index!',
+      })
     }
-
     const { index, value } = option
     return new Promise((resolve, reject) => {
       const getRequest = this.requestStore().index(index).getAll(value)
@@ -118,6 +120,7 @@ export default class Table {
           resolve(getRequest.result)
         } else {
           console.warn('not find record!')
+          resolve([])
         }
       }
       getRequest.onerror = () => {
@@ -166,7 +169,8 @@ export default class Table {
       this.getByIndex(option).then((data: any[]) => {
 
         if (!data.length) {
-          return console.warn('not find this record')
+          console.warn('not find this record')
+          return false
         }
 
         for (const item of data) {

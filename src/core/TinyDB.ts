@@ -2,7 +2,9 @@ import Table from "./Table";
 import { ITinyDB } from "./types/index";
 
 
-const IN_DB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+const win = (typeof window == "undefined" ? global : window);
+
+const IN_DB = win.indexedDB
 
 export default class TinyDB {
   private dbName: string;
@@ -72,7 +74,6 @@ export default class TinyDB {
     const promise = new Promise((resolve, reject) => {
       this.connect(request).then(db => {
         const versionChange = (evt: IDBVersionChangeEvent) => {
-          console.log('versionchange')
           db.close()
           db.removeEventListener('versionchange', versionChange)
         }
@@ -86,7 +87,6 @@ export default class TinyDB {
     const request = IN_DB.deleteDatabase(name)
     const promise = new Promise((resolve, reject) => {
       request.onsuccess = () => {
-        console.log(222)
         const msg: ITinyDB.IState = {
           msg: 'Database deleted successfully',
           status: true
@@ -125,7 +125,6 @@ export default class TinyDB {
         if (options && options.blocked) {
           options.blocked(request)
         }
-        console.log('connect blocked')
       }
 
       const error = () => {
@@ -235,7 +234,6 @@ export default class TinyDB {
         }
       }
       conn_request.onsuccess = () => {
-        console.log(this)
         resolve({
           msg:' deleted table successfully!'
         })

@@ -1,13 +1,22 @@
 {
-  "name": "tinydb",
-  "version": "1.0.0",
-  "main": "dist/TinyDB.global.js",
-  "module": "dist/TinyDB.cjs.js",
-  "author": "travis",
+  "name": "web-tinydb",
+  "version": "0.1.2",
+  "main": "index.js",
+  "module": "dist/tinydb.es.js",
+  "unpkg": "dist/tinydb.global.js",
+  "author": "Hondry Travis",
   "license": "MIT",
+  "homepage": "https://github.com/HondryTravis/TinyDB",
   "scripts": {
+    "dev": "gulp",
     "build": "rollup -c"
   },
+  "files": [
+    "dist",
+    "docs",
+    "src/core",
+    "src/*.d.ts"
+  ],
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^11.2.0",
     "babel-core": "^6.26.3",
@@ -31,5 +40,6 @@
     "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^4.0.0"
-  }
+  },
+  "dependencies": {}
 }

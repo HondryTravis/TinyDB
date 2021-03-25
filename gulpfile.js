@@ -30,12 +30,12 @@ const reload = browserSync.reload
 
 const config = {
   entries: './src/core/index.ts',
-  output_dir: 'lib',
+  output_dir: 'example',
   output_name: 'tinydb.js',
   index_dir: './',
   skin: {
     entry: './src/skin/index.css',
-    output_dir: 'lib'
+    output_dir: 'example'
   }
 }
 
@@ -71,12 +71,12 @@ function bundle() {
 
 
 function build() {
-  return src('./lib/tinydb.js')
+  return src('./example/tinydb.js')
   .pipe(uglify())
   .pipe(rename({
     suffix:'.min'
   }))
-  .pipe(dest('./lib/'))
+  .pipe(dest('./example/'))
 }
 
 function devServer() {

@@ -8,7 +8,7 @@ const OUTPUT_CJS = 'cjs';
 const OUTPUT_IIFE = 'iife';
 const OUTPUT_ES = 'es';
 const OUTPUT_UMD = 'umd';
-const name = 'TinyDB'
+const name = 'tinydb'
 const entryFile = './src/core/index.ts'
 
 
@@ -50,7 +50,7 @@ function createConfig(format, output, plugins = []) {
   }
 
   if(format === 'iife') {
-    output.name = 'TinyDB'
+    output.name = 'DB'
   }
 
   const extensions = ['.ts']
@@ -73,10 +73,10 @@ function createConfig(format, output, plugins = []) {
       }),
       tsProject,
       terser({
-        module: /^es/.test(format),
         compress: {
           ecma: 2015,
-          pure_getters: true
+          pure_getters: true,
+         
         }
       }),
       ...plugins,

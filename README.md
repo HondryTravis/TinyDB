@@ -2,7 +2,7 @@
 
 easy to use multi-table indexeddb lib
 
-## doc
+## Document
 
 [中文文档 zh-CN](docs/ApiDocument.md)
 
@@ -17,6 +17,18 @@ easy to use multi-table indexeddb lib
   gulp
 ```
 
+## 🔨 install
+
+```html
+<script src="https://unpkg.com/browse/web-tinydb@0.1.2/dist/tinydb.global.js"></script>
+```
+
+or
+
+```bash
+yarn instal -D web-tinydb
+```
+
 ## Setup
 
 ### ⚙ init config
@@ -24,6 +36,9 @@ easy to use multi-table indexeddb lib
 初始化配置
 
 ```js
+
+import { TinyDB } from 'web-tinydb'
+
 const tables = [
   {
       name: "table_student",

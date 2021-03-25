@@ -123,8 +123,10 @@ var Table = /** @class */function () {
     };
     Table.prototype.getByIndex = function (option) {
         var _this = this;
-        if (!option) {
-            return Promise.resolve([]);
+        if (!option || !option.value) {
+            return Promise.reject({
+                msg: 'must have one index!'
+            });
         }
         var index = option.index,
             value = option.value;
