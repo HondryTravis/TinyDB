@@ -1,6 +1,6 @@
 {
   "name": "web-tinydb",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "main": "index.js",
   "module": "dist/tinydb.es.js",
   "unpkg": "dist/tinydb.global.js",

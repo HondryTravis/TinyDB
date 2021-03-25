@@ -5,10 +5,10 @@
 一般的我们只需要 `TinyDB.of().setup(config)` 就可以拿到这个数据库包裹对象
 
 ```javascript
-<script src="tinydb.js">
+<script src="tinydb.global.js"></script>
 <script>
   const config = {...}
-  const mydb = TinyDB.of()
+  const mydb = DB.TinyDB.of()
   mydb.setup(config)
 </script>  
 ```

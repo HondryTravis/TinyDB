@@ -4,7 +4,7 @@ easy to use multi-table indexeddb lib
 
 ## Document
 
-[中文文档 zh-CN](docs/ApiDocument.md)
+[中文文档 zh-CN](https://github.com/HondryTravis/TinyDB/blob/master/docs/ApiDocument.md)
 
 [查看 demo](https://hondrytravis.github.io/TinyDB/)
 
@@ -20,7 +20,7 @@ easy to use multi-table indexeddb lib
 ## 🔨 install
 
 ```html
-<script src="https://unpkg.com/browse/web-tinydb@0.1.2/dist/tinydb.global.js"></script>
+<script src="https://unpkg.com/browse/web-tinydb@0.1.4/dist/tinydb.global.js"></script>
 ```
 
 or
