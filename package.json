@@ -1,6 +1,6 @@
 {
   "name": "web-tinydb",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "index.js",
   "module": "dist/tinydb.es.js",
   "unpkg": "dist/tinydb.global.js",
@@ -11,6 +11,13 @@
     "dev": "gulp",
     "build": "rollup -c"
   },
+  "keywords": [
+    "indexdb",
+    "indexeddb",
+    "webdb",
+    "tinydb",
+    "offlinedb"
+  ],
   "files": [
     "dist",
     "docs",

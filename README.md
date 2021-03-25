@@ -20,7 +20,7 @@ easy to use multi-table indexeddb lib
 ## 🔨 install
 
 ```html
-<script src="https://unpkg.com/browse/web-tinydb@0.1.4/dist/tinydb.global.js"></script>
+<script src="https://unpkg.com/browse/web-tinydb@0.1.5/dist/tinydb.global.js"></script>
 ```
 
 or
