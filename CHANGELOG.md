@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.7
+
+- fix update not length value to []
+
 ## 0.1.6
 
 - fix update not length value

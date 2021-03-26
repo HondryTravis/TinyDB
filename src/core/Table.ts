@@ -63,7 +63,7 @@ export default class Table {
       this.getByIndex(option).then((result: any[]) => {
         if (!result.length) {
           console.warn('not found this record')
-          return resolve([])
+          resolve([])
         }
         for (const item of result) {
           const store = this.requestStore()
