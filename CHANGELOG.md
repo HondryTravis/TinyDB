@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.6
+
+- fix update not length value
+
 ## 0.1.5
 
 - add some keywords
