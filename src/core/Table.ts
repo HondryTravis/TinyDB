@@ -143,15 +143,48 @@ export default class Table {
       }
     })
   }
+  limit(option: ITinyDB.ILimt) {
+    const { length, start } = option
+    let index = start || 0
+    let limit = length
+    
+    if(!option || !option.length) {
+      throw console.error('please set length')
+    }
+    return new Promise((resolve, reject) => {
+      let current = []
+      const cursorRequest = this.requestStore().openCursor()
+      cursorRequest.onsuccess = () => {
+        const cursor = cursorRequest.result as IDBCursorWithValue;
+        if(cursor) {
+          if(cursor.key > index && limit) {
+            current.push(cursor.value)
+            limit --
+          }
+          if(limit !== 0) {
+            cursor.continue()
+          }else {
+            resolve(current)
+          }
+        } else {
+          resolve(current)
+        }
+      }
+      cursorRequest.onerror = () => {
+        const cursorError = cursorRequest.error;
+        reject(cursorError)
+      }
+    })
+  }
   some(option: ITinyDB.ISomeOptions) {
     const { index, lower, upper } = option
     return new Promise((resolve, reject) => {
       const cache: any = [];
-      const cursor = this.requestStore().index(index);
+      const indexs = this.requestStore().index(index);
       const range = IDBKeyRange.bound(lower, upper)
-      const rangeRequest = cursor.openCursor(range)
-      rangeRequest.onsuccess = () => {
-        const result = rangeRequest.result;
+      const cursorRangeRequest = indexs.openCursor(range)
+      cursorRangeRequest.onsuccess = () => {
+        const result = cursorRangeRequest.result;
         if (result) {
           cache.push(result.value)
           result.continue()
@@ -159,8 +192,8 @@ export default class Table {
           resolve(cache)
         }
       }
-      rangeRequest.onerror = () => {
-        reject(rangeRequest.error)
+      cursorRangeRequest.onerror = () => {
+        reject(cursorRangeRequest.error)
       }
     })
   }

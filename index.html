@@ -108,7 +108,7 @@
     <div id="showData"></div>
   </div>
 </body>
-<script src="./example/tinydb.min.js"></script>
+<script src="./example/tinydb.js"></script>
 
 <script>
   const ctrlbar = document.querySelector('.ctrlbar');
@@ -295,6 +295,14 @@
   }
   // test_deleteTable()
 
+  async function test_getDataWithLimits() {
+    const result = await test.getDataWithLimits('table_student', {
+      length: 1
+    })
+    console.log(result)
+  }
+  // test_getDataWithLimits()
+
   showData();
   add.addEventListener('click', async () => {
     let inputs = document.querySelectorAll(".add input");
@@ -393,7 +401,6 @@
       return
     }
     for (const item of result) {
-      console.log(item)
       const ul = new Element("ul", {
         id: "db-data"
       }, [

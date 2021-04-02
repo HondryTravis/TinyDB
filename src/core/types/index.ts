@@ -46,6 +46,12 @@ export declare namespace ITinyDB {
     index: string
     value: any
   }
+  export interface ILimt {
+    length: number
+    start?: number
+    range?: IDBKeyRange
+    direction?: IDBCursorDirection
+  }
 
   export interface IRequestCallback {
     successfully?: request_callback

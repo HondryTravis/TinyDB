@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.8
+
+- add getDataWithLimits method, Obtain fixed-length data in set Start
+  
 ## 0.1.7
 
 - fix update not length value to []

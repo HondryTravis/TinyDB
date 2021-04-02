@@ -176,6 +176,10 @@ interface IDatabase {
 
 清除某张表全部数据
 
+### getDataWithLimits(table_name: string, options: ITinyDB.ILimt): Promise
+
+获得指定限制大小的数据
+
 ## 类型文件参考
 
 ```ts
@@ -226,6 +230,13 @@ export declare namespace ITinyDB {
   export interface IGetIndex {
     index: string
     value: any
+  }
+
+  export interface ILimt {
+    length: number
+    start?: number
+    range?: IDBKeyRange
+    direction?: IDBCursorDirection
   }
 
   export interface IRequestCallback {

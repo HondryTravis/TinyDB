@@ -77,7 +77,8 @@ var Table = /** @class */function () {
                 value = option.value;
             _this.getByIndex(option).then(function (result) {
                 if (!result.length) {
-                    return console.warn('not found this record');
+                    console.warn('not found this record');
+                    resolve([]);
                 }
                 var _loop_1 = function _loop_1(item) {
                     var store = _this.requestStore();
@@ -137,6 +138,7 @@ var Table = /** @class */function () {
                     resolve(getRequest.result);
                 } else {
                     console.warn('not find record!');
+                    resolve([]);
                 }
             };
             getRequest.onerror = function () {
@@ -160,6 +162,40 @@ var Table = /** @class */function () {
             };
         });
     };
+    Table.prototype.limit = function (option) {
+        var _this = this;
+        var length = option.length,
+            start = option.start;
+        var index = start || 0;
+        var limit = length;
+        if (!option || !option.length) {
+            throw console.error('please set length');
+        }
+        return new Promise(function (resolve, reject) {
+            var current = [];
+            var cursorRequest = _this.requestStore().openCursor();
+            cursorRequest.onsuccess = function () {
+                var cursor = cursorRequest.result;
+                if (cursor) {
+                    if (cursor.key > index && limit) {
+                        current.push(cursor.value);
+                        limit--;
+                    }
+                    if (limit !== 0) {
+                        cursor.continue();
+                    } else {
+                        resolve(current);
+                    }
+                } else {
+                    resolve(current);
+                }
+            };
+            cursorRequest.onerror = function () {
+                var cursorError = cursorRequest.error;
+                reject(cursorError);
+            };
+        });
+    };
     Table.prototype.some = function (option) {
         var _this = this;
         var index = option.index,
@@ -167,11 +203,11 @@ var Table = /** @class */function () {
             upper = option.upper;
         return new Promise(function (resolve, reject) {
             var cache = [];
-            var cursor = _this.requestStore().index(index);
+            var indexs = _this.requestStore().index(index);
             var range = IDBKeyRange.bound(lower, upper);
-            var rangeRequest = cursor.openCursor(range);
-            rangeRequest.onsuccess = function () {
-                var result = rangeRequest.result;
+            var cursorRangeRequest = indexs.openCursor(range);
+            cursorRangeRequest.onsuccess = function () {
+                var result = cursorRangeRequest.result;
                 if (result) {
                     cache.push(result.value);
                     result.continue();
@@ -179,8 +215,8 @@ var Table = /** @class */function () {
                     resolve(cache);
                 }
             };
-            rangeRequest.onerror = function () {
-                reject(rangeRequest.error);
+            cursorRangeRequest.onerror = function () {
+                reject(cursorRangeRequest.error);
             };
         });
     };
@@ -189,7 +225,8 @@ var Table = /** @class */function () {
         return new Promise(function (resolve, reject) {
             _this.getByIndex(option).then(function (data) {
                 if (!data.length) {
-                    return console.warn('not find this record');
+                    console.warn('not find this record');
+                    return false;
                 }
                 for (var _i = 0, data_1 = data; _i < data_1.length; _i++) {
                     var item = data_1[_i];
@@ -240,11 +277,13 @@ var Table = /** @class */function () {
 exports.default = Table;
 
 },{}],2:[function(require,module,exports){
+(function (global){(function (){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Table_1 = require("./Table");
-var IN_DB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+var win = typeof window == "undefined" ? global : window;
+var IN_DB = win.indexedDB;
 var TinyDB = /** @class */function () {
     function TinyDB() {}
     TinyDB.of = function () {
@@ -309,7 +348,6 @@ var TinyDB = /** @class */function () {
         var promise = new Promise(function (resolve, reject) {
             _this.connect(request).then(function (db) {
                 var versionChange = function versionChange(evt) {
-                    console.log('versionchange');
                     db.close();
                     db.removeEventListener('versionchange', versionChange);
                 };
@@ -322,7 +360,6 @@ var TinyDB = /** @class */function () {
         var request = IN_DB.deleteDatabase(name);
         var promise = new Promise(function (resolve, reject) {
             request.onsuccess = function () {
-                console.log(222);
                 var msg = {
                     msg: 'Database deleted successfully',
                     status: true
@@ -357,7 +394,6 @@ var TinyDB = /** @class */function () {
                 if (options && options.blocked) {
                     options.blocked(request);
                 }
-                console.log('connect blocked');
             };
             var error = function error() {
                 if (options && options.error) {
@@ -493,7 +529,6 @@ var TinyDB = /** @class */function () {
                 }
             };
             conn_request.onsuccess = function () {
-                console.log(_this);
                 resolve({
                     msg: ' deleted table successfully!'
                 });
@@ -542,9 +577,29 @@ var TinyDB = /** @class */function () {
         });
         return promise;
     };
+    TinyDB.prototype.getDataWithLimits = function (table_name, options) {
+        var _this = this;
+        var promise = new Promise(function (resolve, reject) {
+            var request = IN_DB.open(_this.dbName, _this.getVersion());
+            _this.connect(request).then(function (db) {
+                var operator = Table_1.default.of({
+                    name: table_name,
+                    db: db
+                });
+                operator.limit(options).then(function (res) {
+                    return resolve(res);
+                }).catch(function (err) {
+                    return reject(err);
+                });
+            });
+        });
+        return promise;
+    };
     return TinyDB;
 }();
 exports.default = TinyDB;
+
+}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
 },{"./Table":1}],3:[function(require,module,exports){
 "use strict";
@@ -553,7 +608,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TinyDB = void 0;
 var TinyDB_1 = require("./TinyDB");
 exports.TinyDB = TinyDB_1.default;
-window.TinyDB = TinyDB_1.default;
+if (!window.TinyDB) {
+    window.TinyDB = TinyDB_1.default;
+}
 
 },{"./TinyDB":2}]},{},[3])
 

@@ -273,5 +273,18 @@ export default class TinyDB {
     })
     return promise
   }
+  getDataWithLimits(table_name: string, options: ITinyDB.ILimt) {
+    const promise = new Promise((resolve, reject) => {
+      const request = IN_DB.open(this.dbName, this.getVersion())
+      this.connect(request).then((db: IDBDatabase) => {
+        const operator = Table.of({
+          name: table_name,
+          db
+        })
+        operator.limit(options).then(res => resolve(res)).catch((err) => reject(err))
+      })
+    })
+    return promise
+  }
 }
 
