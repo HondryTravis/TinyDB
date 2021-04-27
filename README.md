@@ -20,7 +20,7 @@ easy to use multi-table indexeddb lib
 ## 🔨 install
 
 ```html
-<script src="https://unpkg.com/browse/web-tinydb@0.1.8/dist/tinydb.global.js"></script>
+<script src="https://unpkg.com/browse/web-tinydb@0.1.9/dist/tinydb.global.js"></script>
 ```
 
 or
@@ -189,10 +189,13 @@ test_insert()
 
 ```js
   async function test_deleteRecord() {
+    // use index
     const result = await test.deleteRecord('table_student', {
       index: 'id',
       value: 6
     })
+    // use primaryKey
+    const result = await test.deleteRecord('table_student', 4)
     console.log(result)
   }
   // test_deleteRecord()

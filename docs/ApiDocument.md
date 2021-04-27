@@ -160,9 +160,9 @@ interface IDatabase {
 
 使用创建的索引进行查询
 
-### deleteRecord(table_name: string, options: ITinyDB.IGetIndex): Promise
+### deleteRecord(table_name: string, options: ITinyDB.IGetIndex | ITinyDB.IValidateKey): Promise
 
-通过创建的索引删除
+通过创建的索引删除, 也可以直接通过主键(创建表时的 primaryKey)删除
 
 ### deleteTable(tableName: string): Promise
 

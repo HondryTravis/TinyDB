@@ -269,13 +269,16 @@
   // test_getByIndex()
 
   async function test_deleteRecord() {
+    // used index
     const result = await test.deleteRecord('table_student', {
       index: 'id',
       value: 6
     })
+    // used primaryKey to delete
+    // const result = await test.deleteRecord('table_student', 4)
     console.log(result)
   }
-  // test_deleteRecord()
+  test_deleteRecord()
 
   async function test_deleteDatabase() {
     const result = await test.deleteDatabase('test')

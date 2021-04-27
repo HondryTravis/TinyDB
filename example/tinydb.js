@@ -1,6 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var __assign = undefined && undefined.__assign || function () {
     __assign = Object.assign || function (t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -223,6 +225,19 @@ var Table = /** @class */function () {
     Table.prototype.deleteRecord = function (option) {
         var _this = this;
         return new Promise(function (resolve, reject) {
+            if (!option) {
+                throw new Error('must be one index or option');
+            }
+            if ((typeof option === "undefined" ? "undefined" : _typeof(option)) === 'object') {
+                return _this.deleteRecordByOption(option);
+            } else {
+                return _this.deleteRecordByPrimaryKey(option);
+            }
+        });
+    };
+    Table.prototype.deleteRecordByOption = function (option) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
             _this.getByIndex(option).then(function (data) {
                 if (!data.length) {
                     console.warn('not find this record');
@@ -246,6 +261,32 @@ var Table = /** @class */function () {
                         });
                     };
                 }
+            });
+        });
+    };
+    Table.prototype.deleteRecordByPrimaryKey = function (primaryKey) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            _this.getByPrimaryKey(primaryKey).then(function (data) {
+                if (!data) {
+                    console.warn('not find this record');
+                    return false;
+                }
+                var store = _this.requestStore();
+                var keyPath = store.keyPath;
+                var deleteRequest = store.delete(data[keyPath]);
+                deleteRequest.onsuccess = function () {
+                    resolve({
+                        msg: 'delete successfully!',
+                        status: true
+                    });
+                };
+                deleteRequest.onerror = function () {
+                    reject({
+                        msg: 'delete failed!',
+                        status: false
+                    });
+                };
             });
         });
     };

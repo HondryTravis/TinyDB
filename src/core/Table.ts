@@ -197,10 +197,22 @@ export default class Table {
       }
     })
   }
-  deleteRecord(option: ITinyDB.IGetIndex){
+  deleteRecord(option: ITinyDB.IGetIndex ){
+    return new Promise((resolve, reject) => {
+      if(!option) {
+        throw new Error('must be one index or option')
+      }
+
+      if(typeof option === 'object') {
+        return this.deleteRecordByOption(option)
+      } else {
+        return this.deleteRecordByPrimaryKey(option as ITinyDB.IValidateKey)
+      }
+    })
+  }
+  deleteRecordByOption(option: ITinyDB.IGetIndex) {
     return new Promise((resolve, reject) => {
       this.getByIndex(option).then((data: any[]) => {
-
         if (!data.length) {
           console.warn('not find this record')
           return false
@@ -222,6 +234,31 @@ export default class Table {
               status: false
             })
           }
+        }
+      })
+    })
+  }
+  deleteRecordByPrimaryKey(primaryKey: ITinyDB.IValidateKey) {
+    return new Promise((resolve, reject) => {
+      this.getByPrimaryKey(primaryKey).then( (data)=> {
+        if(!data) {
+          console.warn('not find this record')
+          return false
+        }
+        const store = this.requestStore()
+        const { keyPath } = store
+        const deleteRequest = store.delete(data[keyPath as string])
+        deleteRequest.onsuccess = () => {
+          resolve({
+            msg: 'delete successfully!',
+            status: true
+          })
+        }
+        deleteRequest.onerror = () => {
+          reject({
+            msg: 'delete failed!',
+            status: false
+          })
         }
       })
     })
