@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.10
+
+- fix deleteRecord some error
+
 ## 0.1.9
 
 - change deleteRecord method, support used primaryKey to delete

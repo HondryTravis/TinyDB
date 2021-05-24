@@ -198,17 +198,14 @@ export default class Table {
     })
   }
   deleteRecord(option: ITinyDB.IGetIndex ){
-    return new Promise((resolve, reject) => {
-      if(!option) {
-        throw new Error('must be one index or option')
-      }
-
-      if(typeof option === 'object') {
-        return this.deleteRecordByOption(option)
-      } else {
-        return this.deleteRecordByPrimaryKey(option as ITinyDB.IValidateKey)
-      }
-    })
+    if(!option) {
+      throw new Error('must be one index or option')
+    }
+    if(typeof option === 'object') {
+      return this.deleteRecordByOption(option)
+    } else {
+      return this.deleteRecordByPrimaryKey(option as ITinyDB.IValidateKey)
+    }
   }
   deleteRecordByOption(option: ITinyDB.IGetIndex) {
     return new Promise((resolve, reject) => {

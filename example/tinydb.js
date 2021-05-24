@@ -223,17 +223,14 @@ var Table = /** @class */function () {
         });
     };
     Table.prototype.deleteRecord = function (option) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            if (!option) {
-                throw new Error('must be one index or option');
-            }
-            if ((typeof option === "undefined" ? "undefined" : _typeof(option)) === 'object') {
-                return _this.deleteRecordByOption(option);
-            } else {
-                return _this.deleteRecordByPrimaryKey(option);
-            }
-        });
+        if (!option) {
+            throw new Error('must be one index or option');
+        }
+        if ((typeof option === "undefined" ? "undefined" : _typeof(option)) === 'object') {
+            return this.deleteRecordByOption(option);
+        } else {
+            return this.deleteRecordByPrimaryKey(option);
+        }
     };
     Table.prototype.deleteRecordByOption = function (option) {
         var _this = this;
