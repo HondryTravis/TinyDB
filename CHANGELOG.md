@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.1.11
+
+- support updateRecord by primaryKey
+
 ## 0.1.10
 
 - fix deleteRecord some error

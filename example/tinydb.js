@@ -73,11 +73,19 @@ var Table = /** @class */function () {
         return promise;
     };
     Table.prototype.update = function (option, record) {
+        if (!option) {
+            throw new Error('must be one index or option');
+        }
+        if ((typeof option === "undefined" ? "undefined" : _typeof(option)) === 'object') {
+            return this.updateByOption(option, record);
+        } else {
+            return this.updateByPrimaryKey(option, record);
+        }
+    };
+    Table.prototype.updateByOption = function (option, record) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
-            var index = option.index,
-                value = option.value;
-            _this.getByIndex(option).then(function (result) {
+            var innerUpdate = function innerUpdate(result) {
                 if (!result.length) {
                     console.warn('not found this record');
                     resolve([]);
@@ -104,6 +112,40 @@ var Table = /** @class */function () {
                     var item = result_1[_i];
                     _loop_1(item);
                 }
+            };
+            _this.getByIndex(option).then(function (result) {
+                return innerUpdate(result);
+            });
+        });
+        return promise;
+    };
+    Table.prototype.updateByPrimaryKey = function (primaryKey, record) {
+        var _this = this;
+        var promise = new Promise(function (resolve, reject) {
+            var innerUpdate = function innerUpdate(result) {
+                if (!result) {
+                    console.warn('not found this record');
+                    resolve([]);
+                }
+                var store = _this.requestStore();
+                var newRecord = __assign(__assign({}, result), record);
+                var updateRequest = store.put(newRecord);
+                updateRequest.onsuccess = function () {
+                    resolve({
+                        msg: 'update successfully!',
+                        status: true
+                    });
+                };
+                updateRequest.onerror = function () {
+                    reject({
+                        msg: 'update failed!',
+                        status: false,
+                        activedRequest: updateRequest
+                    });
+                };
+            };
+            _this.getByPrimaryKey(primaryKey).then(function (result) {
+                return innerUpdate(result);
             });
         });
         return promise;

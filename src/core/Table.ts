@@ -58,9 +58,18 @@ export default class Table {
     return promise
   }
   update(option: ITinyDB.IGetIndex, record: any) {
+    if(!option) {
+      throw new Error('must be one index or option')
+    }
+    if(typeof option === 'object') {
+      return this.updateByOption(option, record)
+    } else {
+      return this.updateByPrimaryKey(option as ITinyDB.IValidateKey, record)
+    }
+  }
+  updateByOption(option: ITinyDB.IGetIndex, record: any) {
     const promise = new Promise((resolve, reject) => {
-      const { index, value } = option
-      this.getByIndex(option).then((result: any[]) => {
+      const innerUpdate = (result: any[]) => {
         if (!result.length) {
           console.warn('not found this record')
           resolve([])
@@ -86,8 +95,41 @@ export default class Table {
             })
           }
         }
-      })
+      }
+      this.getByIndex(option).then((result: any[]) => innerUpdate(result))
     })
+    return promise
+  }
+  updateByPrimaryKey(primaryKey: ITinyDB.IValidateKey, record: any) {
+    const promise = new Promise((resolve, reject) => {
+      const innerUpdate = (result: any[]) => {
+        if (!result) {
+          console.warn('not found this record')
+          resolve([])
+        }
+        const store = this.requestStore()
+        const newRecord = {
+          ...result,
+          ...record
+        }
+        const updateRequest = store.put(newRecord)
+        updateRequest.onsuccess = () => {
+          resolve({
+            msg: 'update successfully!',
+            status: true,
+          })
+        }
+        updateRequest.onerror = () => {
+          reject({
+            msg: 'update failed!',
+            status: false,
+            activedRequest: updateRequest
+          })
+        }
+      }
+      this.getByPrimaryKey(primaryKey).then((result: any[]) => innerUpdate(result))
+    })
+
     return promise
   }
   getByPrimaryKey(primaryKey: ITinyDB.IValidateKey) {
