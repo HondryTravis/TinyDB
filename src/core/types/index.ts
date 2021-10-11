@@ -7,7 +7,7 @@ export declare namespace ITinyDB {
   export type key_index = string | number
   export type request_callback = undefined | (<T>(request: T, option?: IState) => any)
   export type IOperateMode = 'readonly' | 'readwrite'
-  export type IValidateKey = string | number | Date | ArrayBufferView | ArrayBuffer | IDBArrayKey | IDBKeyRange
+  export type IValidateKey = IDBValidKey
 
   export interface IDatabase {
     dbName: string
